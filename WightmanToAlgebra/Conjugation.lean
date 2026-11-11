@@ -21,8 +21,8 @@ theorem properLorentz_inv_mem (Λ : ProperLorentz) :
     (∀ x, (Λ.val⁻¹).val x ∈ forwardCone ↔ x ∈ forwardCone) := by
   obtain ⟨u, hdet, hsq, hcone⟩ := Λ
   have key : ∀ x, u.val ((u⁻¹).val x) = x := fun x => by
-    rw [← ContinuousLinearMap.mul_apply, ← Units.val_mul, mul_inv_cancel, Units.val_one,
-      ContinuousLinearMap.one_apply]
+    rw [← mul_apply_eq_comp, ← Units.val_mul, mul_inv_cancel, Units.val_one,
+      one_apply_eq_self]
   refine ⟨?_, fun x => ?_, fun x => ?_⟩
   · have h : u.val.toLinearMap * (u⁻¹).val.toLinearMap = 1 := by
       ext x
@@ -40,16 +40,6 @@ theorem properLorentz_inv_mem (Λ : ProperLorentz) :
 /-- Inverse in Poincaré coordinates: `(Λ, a)⁻¹ = (Λ⁻¹, -Λ⁻¹ a)`. -/
 def poincareInv (g : PoincareCoordinates) : PoincareCoordinates :=
   (⟨g.1.val⁻¹, properLorentz_inv_mem g.1⟩, -((g.1.val⁻¹).val g.2))
-
-theorem lorentz_apply_inv_apply (Λ : ProperLorentz) (x : Spacetime) :
-    Λ.val.val ((Λ.val⁻¹).val x) = x := by
-  rw [← ContinuousLinearMap.mul_apply, ← Units.val_mul, mul_inv_cancel, Units.val_one,
-    ContinuousLinearMap.one_apply]
-
-theorem lorentz_inv_apply_apply (Λ : ProperLorentz) (x : Spacetime) :
-    (Λ.val⁻¹).val (Λ.val.val x) = x := by
-  rw [← ContinuousLinearMap.mul_apply, ← Units.val_mul, inv_mul_cancel, Units.val_one,
-    ContinuousLinearMap.one_apply]
 
 theorem poincareCoordinates_ext {p q : PoincareCoordinates} (h₁ : p.1.val = q.1.val)
     (h₂ : p.2 = q.2) : p = q :=
@@ -143,7 +133,7 @@ theorem onTests_mul (s t : P.Symmetry) (f : TestFunction) :
   rw [P.pullback, P.pullback, P.pullback]
   congr 1
   rw [coordinates_mul_fst, coordinates_mul_snd, mul_inv_rev, Units.val_mul,
-    ContinuousLinearMap.mul_apply]
+    mul_apply_eq_comp]
   congr 1
   rw [show ∀ a b c : Spacetime, a - (b + c) = (a - c) - b from fun a b c => by abel]
   simp only [map_sub, lorentz_inv_apply_apply]
