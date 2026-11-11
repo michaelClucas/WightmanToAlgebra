@@ -21,7 +21,8 @@ variable {H : HilbertSpace} {Labels : FieldLabels}
 /-- Smeared fields with test-function support in `A`, as endomorphisms of the domain. -/
 def localGenerators (F : FieldSystem H Labels) (A : Set Spacetime) :
     Set (Module.End ℂ F.domain) :=
-  {X | ∃ l f, tsupport (f : Spacetime → ℂ) ⊆ A ∧ X = F.field l f}
+  {X | ∃ (l : Labels.carrier) (f : TestFunction), tsupport (f : Spacetime → ℂ) ⊆ A ∧
+    X = F.field l f}
 
 theorem localGenerators_mono (F : FieldSystem H Labels) {A B : Set Spacetime}
     (h : A ⊆ B) : localGenerators F A ⊆ localGenerators F B := by
@@ -56,17 +57,17 @@ section Star
 
 variable (T : WightmanTheory H Labels) (hT : T.Axioms) (A : Set Spacetime)
 
-def polyStar : Star (polynomialAlgebra T.fields A) where
+@[reducible] def polyStar : Star (polynomialAlgebra T.fields A) where
   star X := ⟨(exists_formalAdjoint T hT A X.2).choose,
     (exists_formalAdjoint T hT A X.2).choose_spec.1⟩
 
-def polyStarRing : StarRing (polynomialAlgebra T.fields A) :=
+@[reducible] def polyStarRing : StarRing (polynomialAlgebra T.fields A) :=
   { polyStar T hT A with
     star_involutive := sorry
     star_mul := sorry
     star_add := sorry }
 
-def polyStarModule :
+theorem polyStarModule :
     letI := polyStarRing T hT A
     StarModule ℂ (polynomialAlgebra T.fields A) :=
   letI := polyStarRing T hT A
@@ -81,7 +82,9 @@ def polynomialNet (T : WightmanTheory H Labels) (hT : T.Axioms) : Net where
   algebra _ := inferInstance
   starRing O := polyStarRing T hT O.carrier
   starModule O := polyStarModule T hT O.carrier
-  incl h :=
+  incl {O₁ O₂} h :=
+    letI := polyStarRing T hT O₁.carrier
+    letI := polyStarRing T hT O₂.carrier
     { Subalgebra.inclusion (polynomialAlgebra_mono T.fields h) with
       map_star' := sorry }
 

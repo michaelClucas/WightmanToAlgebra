@@ -1,2 +1,6 @@
 .lake/
 *.olean
+.elan/
+.scratch/
+.cache/
+.claude/worktrees/
