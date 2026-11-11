@@ -45,13 +45,80 @@ def IsFormalAdjoint (F : FieldSystem H Labels) (X Y : Module.End ℂ F.domain) :
 theorem formalAdjoint_unique (F : FieldSystem H Labels) (hF : F.DomainAxioms)
     {X Y Y' : Module.End ℂ F.domain} (hY : IsFormalAdjoint F X Y)
     (hY' : IsFormalAdjoint F X Y') : Y = Y' := by
-  sorry
+  refine LinearMap.ext fun v => Subtype.ext ?_
+  set w : H.carrier := (Y v).1 - (Y' v).1 with hw_def
+  have hD : ∀ u : F.domain, inner ℂ u.1 w = 0 := by
+    intro u
+    rw [hw_def, inner_sub_right, ← hY u v, ← hY' u v, sub_self]
+  have hc : Continuous fun x : H.carrier => inner ℂ x w :=
+    continuous_id.inner continuous_const
+  have hall : (fun x : H.carrier => inner ℂ x w) = fun _ => (0 : ℂ) :=
+    Continuous.ext_on hF.denseDomain hc continuous_const (fun x hx => hD ⟨x, hx⟩)
+  have hw0 : w = 0 := inner_self_eq_zero.mp (congrFun hall w)
+  exact sub_eq_zero.mp hw0
+
+theorem IsFormalAdjoint.symm {F : FieldSystem H Labels} {X Y : Module.End ℂ F.domain}
+    (h : IsFormalAdjoint F X Y) : IsFormalAdjoint F Y X := by
+  intro u v
+  rw [← inner_conj_symm, ← h v u, inner_conj_symm]
+
+theorem IsFormalAdjoint.add {F : FieldSystem H Labels} {X X' Z Z' : Module.End ℂ F.domain}
+    (hX : IsFormalAdjoint F X X') (hZ : IsFormalAdjoint F Z Z') :
+    IsFormalAdjoint F (X + Z) (X' + Z') := by
+  intro u v
+  simp only [LinearMap.add_apply, Submodule.coe_add, inner_add_left, inner_add_right, hX u v,
+    hZ u v]
+
+theorem IsFormalAdjoint.mul {F : FieldSystem H Labels} {X X' Z Z' : Module.End ℂ F.domain}
+    (hX : IsFormalAdjoint F X X') (hZ : IsFormalAdjoint F Z Z') :
+    IsFormalAdjoint F (X * Z) (Z' * X') := by
+  intro u v
+  simp only [Module.End.mul_apply]
+  rw [hX (Z u) v, hZ u (X' v)]
+
+theorem IsFormalAdjoint.smul {F : FieldSystem H Labels} {X X' : Module.End ℂ F.domain}
+    (hX : IsFormalAdjoint F X X') (c : ℂ) :
+    IsFormalAdjoint F (c • X) (star c • X') := by
+  intro u v
+  simp only [LinearMap.smul_apply, Submodule.coe_smul, inner_smul_left, inner_smul_right, hX u v]
+  rfl
+
+theorem isFormalAdjoint_algebraMap (F : FieldSystem H Labels) (c : ℂ) :
+    IsFormalAdjoint F (algebraMap ℂ (Module.End ℂ F.domain) c)
+      (algebraMap ℂ (Module.End ℂ F.domain) (star c)) := by
+  intro u v
+  simp only [Module.algebraMap_end_apply, Submodule.coe_smul, inner_smul_left, inner_smul_right]
+  rfl
+
+theorem tsupport_conjugateTest (f : TestFunction) :
+    tsupport (conjugateTest f : Spacetime → ℂ) = tsupport (f : Spacetime → ℂ) := by
+  have : Function.support (conjugateTest f : Spacetime → ℂ) =
+      Function.support (f : Spacetime → ℂ) := by
+    ext x
+    simp only [Function.mem_support, conjugateTest, SchwartzMap.postcompCLM_apply, ne_eq]
+    simp
+  simp only [tsupport, this]
 
 theorem exists_formalAdjoint (T : WightmanTheory H Labels) (hT : T.Axioms)
     (A : Set Spacetime) {X : Module.End ℂ T.fields.domain}
     (hX : X ∈ polynomialAlgebra T.fields A) :
     ∃ Y ∈ polynomialAlgebra T.fields A, IsFormalAdjoint T.fields X Y := by
-  sorry
+  induction hX using Algebra.adjoin_induction with
+  | mem X hX =>
+    obtain ⟨l, f, hf, rfl⟩ := hX
+    refine ⟨T.fields.field (T.adjointLabel l) (conjugateTest f), Algebra.subset_adjoin
+      ⟨T.adjointLabel l, conjugateTest f, (tsupport_conjugateTest f).symm ▸ hf, rfl⟩, ?_⟩
+    exact hT.w1.adjoint l f
+  | algebraMap c =>
+    exact ⟨_, Subalgebra.algebraMap_mem _ (star c), isFormalAdjoint_algebraMap _ c⟩
+  | add X Z _ _ ihX ihZ =>
+    obtain ⟨X', hX'm, hX'⟩ := ihX
+    obtain ⟨Z', hZ'm, hZ'⟩ := ihZ
+    exact ⟨X' + Z', Subalgebra.add_mem _ hX'm hZ'm, hX'.add hZ'⟩
+  | mul X Z _ _ ihX ihZ =>
+    obtain ⟨X', hX'm, hX'⟩ := ihX
+    obtain ⟨Z', hZ'm, hZ'⟩ := ihZ
+    exact ⟨Z' * X', Subalgebra.mul_mem _ hZ'm hX'm, hX'.mul hZ'⟩
 
 section Star
 
@@ -61,17 +128,51 @@ variable (T : WightmanTheory H Labels) (hT : T.Axioms) (A : Set Spacetime)
   star X := ⟨(exists_formalAdjoint T hT A X.2).choose,
     (exists_formalAdjoint T hT A X.2).choose_spec.1⟩
 
+/-- `star X` is a formal adjoint of `X`. -/
+theorem polyStar_spec (X : polynomialAlgebra T.fields A) :
+    letI := polyStar T hT A
+    IsFormalAdjoint T.fields X.1 (star X).1 :=
+  (exists_formalAdjoint T hT A X.2).choose_spec.2
+
+include hT in
+/-- Two elements of `P(A)` are equal once they are formal adjoints of the same operator. -/
+theorem polyStar_eq_of_isFormalAdjoint {X : Module.End ℂ T.fields.domain}
+    {Y Y' : polynomialAlgebra T.fields A} (hY : IsFormalAdjoint T.fields X Y.1)
+    (hY' : IsFormalAdjoint T.fields X Y'.1) : Y = Y' :=
+  Subtype.ext (formalAdjoint_unique T.fields hT.w1.domain hY hY')
+
 @[reducible] def polyStarRing : StarRing (polynomialAlgebra T.fields A) :=
   { polyStar T hT A with
-    star_involutive := sorry
-    star_mul := sorry
-    star_add := sorry }
+    star_involutive := fun X =>
+      polyStar_eq_of_isFormalAdjoint T hT A (polyStar_spec T hT A _)
+        (polyStar_spec T hT A X).symm
+    star_mul := fun X Z =>
+      polyStar_eq_of_isFormalAdjoint T hT A (polyStar_spec T hT A (X * Z))
+        ((polyStar_spec T hT A X).mul (polyStar_spec T hT A Z))
+    star_add := fun X Z =>
+      polyStar_eq_of_isFormalAdjoint T hT A (polyStar_spec T hT A (X + Z))
+        ((polyStar_spec T hT A X).add (polyStar_spec T hT A Z)) }
 
 theorem polyStarModule :
     letI := polyStarRing T hT A
     StarModule ℂ (polynomialAlgebra T.fields A) :=
   letI := polyStarRing T hT A
-  ⟨sorry⟩
+  ⟨fun c X => polyStar_eq_of_isFormalAdjoint T hT A (polyStar_spec T hT A (c • X))
+    ((polyStar_spec T hT A X).smul c)⟩
+
+/-- The inclusion `P(A) → P(B)` commutes with the formal-adjoint star. -/
+theorem polyStar_inclusion {B : Set Spacetime} (h : A ⊆ B)
+    (X : polynomialAlgebra T.fields A) :
+    letI := polyStar T hT A
+    letI := polyStar T hT B
+    Subalgebra.inclusion (polynomialAlgebra_mono T.fields h) (star X) =
+      star (Subalgebra.inclusion (polynomialAlgebra_mono T.fields h) X) := by
+  apply polyStar_eq_of_isFormalAdjoint T hT B (X := X.1)
+  · rw [Subalgebra.coe_inclusion]
+    exact polyStar_spec T hT A X
+  · have hs := polyStar_spec T hT B (Subalgebra.inclusion (polynomialAlgebra_mono T.fields h) X)
+    rw [Subalgebra.coe_inclusion] at hs
+    exact hs
 
 end Star
 
@@ -86,7 +187,7 @@ def polynomialNet (T : WightmanTheory H Labels) (hT : T.Axioms) : Net where
     letI := polyStarRing T hT O₁.carrier
     letI := polyStarRing T hT O₂.carrier
     { Subalgebra.inclusion (polynomialAlgebra_mono T.fields h) with
-      map_star' := sorry }
+      map_star' := polyStar_inclusion T hT O₁.carrier h }
 
 /-- `P(O) → P(gO)`, `X ↦ U(g) X U(g)⁻¹` restricted to the invariant domain. -/
 def polynomialCovariance (T : WightmanTheory H Labels) (hT : T.Axioms) :
