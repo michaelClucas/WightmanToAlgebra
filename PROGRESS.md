@@ -8,8 +8,8 @@ Single source of truth for the overseer run. Updated after every merge.
 | `properLorentz_mul_mem`, `properLorentz_one_mem` | Regions.lean | geometry agent | done (e7d827a) | 1 | |
 | `poincareAct_isOpen`, `poincareAct_bounded`, `poincareAct_causallyConvex` | Regions.lean | geometry agent | done (e7d827a) | 1 | |
 | `Region.map_one`, `Region.map_mul` | Regions.lean | geometry agent | done (e7d827a) | 1 | |
-| `formalAdjoint_unique`, `exists_formalAdjoint` | PolynomialNet.lean | star agent | in progress | 0 | |
-| `polyStarRing`, `polyStarModule`, `map_star'` | PolynomialNet.lean | star agent | in progress | 0 | |
+| `formalAdjoint_unique`, `exists_formalAdjoint` | PolynomialNet.lean | star agent | done (8221e31) | 1 | |
+| `polyStarRing`, `polyStarModule`, `map_star'` | PolynomialNet.lean | star agent | done (8221e31) | 1 | inline `map_star'` proof hung Lean >15 min; fixed by separate lemma `polyStar_inclusion` |
 | `polynomialCovariance` + covariance laws | PolynomialNet.lean | covariance agent | in progress | 0 | |
 | isotony, Einstein causality | Main.lean | main agent | in progress | 0 | |
 | `wightman_to_haagKastler` | Main.lean | overseer | todo | 0 | |
