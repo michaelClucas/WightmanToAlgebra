@@ -26,18 +26,21 @@ theorem wightman_to_haagKastler (T : WightmanTheory H Labels) (hT : T.Axioms) :
     (polynomialNet T hT).Covariant (polynomialCovariance T hT) := by
   sorry
 
-/-- The Yang–Mills hierarchies of the upstream result carry Haag–Kastler nets. -/
+/-- The Yang–Mills hierarchies of the upstream result carry Haag–Kastler nets:
+the polynomial field net of the hierarchy's own Wightman theory. -/
 theorem yangMills_haagKastler (hYM : JointExistence) :
-    ∀ g : GaugeGroup, g.IsSimple → ∃ C : WilsonFamily g,
+    ∀ g : GaugeGroup, g.IsSimple → ∃ C : WilsonFamily g, WilsonRegularity C ∧
       ∀ p : ℕ → ℕ, StrictMono p → ∃ q : ℕ → ℕ, StrictMono q ∧
-        ∃ T : Hierarchy C, ∃ N : Net, ∃ α : N.Covariance,
-          N.Isotony ∧ N.EinsteinCausality ∧ N.Covariant α := by
+        ∃ T : Hierarchy C, T.Properties (p ∘ q) ∧
+          ∃ hax : T.theory.Axioms,
+            (polynomialNet T.theory hax).Isotony ∧
+            (polynomialNet T.theory hax).EinsteinCausality ∧
+            (polynomialNet T.theory hax).Covariant (polynomialCovariance T.theory hax) := by
   intro g hg
-  obtain ⟨C, -, hC⟩ := hYM g hg
-  refine ⟨C, fun p hp => ?_⟩
+  obtain ⟨C, hreg, hC⟩ := hYM g hg
+  refine ⟨C, hreg, fun p hp => ?_⟩
   obtain ⟨q, hq, T, hT⟩ := hC p hp
-  have hax := hT.reconstruction.axioms
-  exact ⟨q, hq, T, polynomialNet T.theory hax, polynomialCovariance T.theory hax,
-    wightman_to_haagKastler T.theory hax⟩
+  exact ⟨q, hq, T, hT, hT.reconstruction.axioms,
+    wightman_to_haagKastler T.theory hT.reconstruction.axioms⟩
 
 end WightmanToAlgebra
