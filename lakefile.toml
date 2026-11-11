@@ -1,0 +1,15 @@
+name = "wightman_to_algebra"
+version = "0.1.0"
+defaultTargets = ["WightmanToAlgebra"]
+
+[leanOptions]
+autoImplicit = false
+
+[[lean_lib]]
+name = "WightmanToAlgebra"
+
+# Pinned to the commit whose Wightman statement (PublicTheory.lean) this repo targets.
+[[require]]
+name = "ym_core"
+git = "https://github.com/yang-mills-group/OpenAI-YM-20261028.git"
+rev = "3456e5e75cf8d4cd558955a5c7638fba2d68f464"
