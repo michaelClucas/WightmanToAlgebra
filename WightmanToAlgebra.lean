@@ -2,6 +2,7 @@ import WightmanToAlgebra.Regions
 import WightmanToAlgebra.HaagKastler
 import WightmanToAlgebra.PolynomialNet
 import WightmanToAlgebra.Main
+import WightmanToAlgebra.DoubleCone
 import WightmanToAlgebra.Vacuum
 import WightmanToAlgebra.WightmanVacuum
 import WightmanToAlgebra.BoundedNet
