@@ -1,4 +1,5 @@
 import WightmanToAlgebra.PolynomialNet
+import WightmanToAlgebra.Locality
 import ChallengeSpec
 
 /-! Main statements.
@@ -16,6 +17,20 @@ namespace WightmanToAlgebra
 open YangMills
 
 variable {H : HilbertSpace} {Labels : FieldLabels}
+
+theorem polynomialNet_isotony (T : WightmanTheory H Labels) (hT : T.Axioms) :
+    (polynomialNet T hT).Isotony where
+  injective h := fun a b hab =>
+    Subalgebra.inclusion_injective (polynomialAlgebra_mono T.fields h) hab
+  refl _ := StarAlgHom.ext fun _ => Subtype.ext rfl
+  trans _ _ := StarAlgHom.ext fun _ => Subtype.ext rfl
+
+theorem polynomialNet_einsteinCausality (T : WightmanTheory H Labels) (hT : T.Axioms) :
+    (polynomialNet T hT).EinsteinCausality := by
+  intro O₁ O₂ O h₁ h₂ hd a b
+  let a' : polynomialAlgebra T.fields O₁.carrier := a
+  let b' : polynomialAlgebra T.fields O₂.carrier := b
+  exact Subtype.ext (polynomialAlgebra_commute T.fields hT.w3.locality hd a'.2 b'.2).eq
 
 /-- Wightman W0–W3 give a net satisfying isotony, Einstein causality and
 Poincaré covariance in the Fewster–Rejzner sense. Timeslice is not claimed:
