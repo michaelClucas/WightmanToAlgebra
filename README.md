@@ -48,15 +48,23 @@ builds the full construction.
 
 ## Status
 
-Statements are in place; proofs are `sorry`. Remaining obligations:
+Phases 0–4 complete: no `sorry` in `WightmanToAlgebra/`, and
 
-- [ ] `properLorentz_mul_mem`, `properLorentz_one_mem`
-- [ ] `poincareAct_isOpen`, `poincareAct_bounded`, `poincareAct_causallyConvex`
-- [ ] `Region.map_one`, `Region.map_mul`
-- [ ] `formalAdjoint_unique`, `exists_formalAdjoint`
-- [ ] `polyStarRing`, `polyStarModule`, `map_star'` of inclusions
-- [ ] `polynomialCovariance` (construction)
-- [ ] `wightman_to_haagKastler`
+```
+'WightmanToAlgebra.wightman_to_haagKastler' depends on axioms: [propext, Classical.choice, Quot.sound]
+'WightmanToAlgebra.yangMills_haagKastler' depends on axioms: [propext, Classical.choice, Quot.sound]
+```
+
+- [x] `properLorentz_mul_mem`, `properLorentz_one_mem`
+- [x] `poincareAct_isOpen`, `poincareAct_bounded`, `poincareAct_causallyConvex`
+- [x] `Region.map_one`, `Region.map_mul`
+- [x] `formalAdjoint_unique`, `exists_formalAdjoint`
+- [x] `polyStarRing`, `polyStarModule`, `map_star'` of inclusions
+- [x] `polynomialCovariance` (conjugation by `U(g)` on the domain) and `polynomialCovariance_covariant`
+- [x] `wightman_to_haagKastler`
+- [x] `yangMills_haagKastler`, strengthened so the net is the hierarchy's own polynomial net (DECISIONS.md D3)
+- [ ] Phase 5 audit (`AUDIT.md`)
+- [ ] Phase 6 stretch: vacuum/GNS, timeslice, bounded nets
 
 ## Build
 

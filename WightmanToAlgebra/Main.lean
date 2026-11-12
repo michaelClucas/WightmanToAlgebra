@@ -18,19 +18,36 @@ open YangMills
 
 variable {H : HilbertSpace} {Labels : FieldLabels}
 
+theorem polyVal_mul' (T : WightmanTheory H Labels) (hT : T.Axioms) {O : Region}
+    (X Y : (polynomialNet T hT).Alg O) :
+    polyVal T hT (X * Y) = polyVal T hT X * polyVal T hT Y := by
+  unfold polyVal
+  exact Subalgebra.coe_mul _ _ _
+
+-- Proofs go through `polyVal_incl`: `Subtype.ext rfl` makes the kernel unfold the
+-- `choose`-based star and time out.
 theorem polynomialNet_isotony (T : WightmanTheory H Labels) (hT : T.Axioms) :
     (polynomialNet T hT).Isotony where
-  injective h := fun a b hab =>
-    Subalgebra.inclusion_injective (polynomialAlgebra_mono T.fields h) hab
-  refl _ := StarAlgHom.ext fun _ => Subtype.ext rfl
-  trans _ _ := StarAlgHom.ext fun _ => Subtype.ext rfl
+  injective {_ O₂} h a b hab := by
+    apply polyVal_injective T hT
+    rw [← polyVal_incl T hT h a, ← polyVal_incl T hT h b, hab]
+  refl O := by
+    refine StarAlgHom.ext fun a => ?_
+    apply polyVal_injective T hT O
+    rw [polyVal_incl]
+    rfl
+  trans {_ _ O₃} h₁₂ h₂₃ := by
+    refine StarAlgHom.ext fun a => ?_
+    apply polyVal_injective T hT O₃
+    rw [StarAlgHom.comp_apply, polyVal_incl, polyVal_incl, polyVal_incl]
 
 theorem polynomialNet_einsteinCausality (T : WightmanTheory H Labels) (hT : T.Axioms) :
     (polynomialNet T hT).EinsteinCausality := by
   intro O₁ O₂ O h₁ h₂ hd a b
-  let a' : polynomialAlgebra T.fields O₁.carrier := a
-  let b' : polynomialAlgebra T.fields O₂.carrier := b
-  exact Subtype.ext (polynomialAlgebra_commute T.fields hT.w3.locality hd a'.2 b'.2).eq
+  apply polyVal_injective T hT O
+  rw [polyVal_mul', polyVal_mul', polyVal_incl, polyVal_incl]
+  exact (polynomialAlgebra_commute T.fields hT.w3.locality hd
+    (polyVal_mem T hT a) (polyVal_mem T hT b)).eq
 
 /-- Wightman W0–W3 give a net satisfying isotony, Einstein causality and
 Poincaré covariance in the Fewster–Rejzner sense. Timeslice is not claimed:
@@ -38,8 +55,9 @@ it does not follow from W0–W3 for polynomial field algebras in general. -/
 theorem wightman_to_haagKastler (T : WightmanTheory H Labels) (hT : T.Axioms) :
     (polynomialNet T hT).Isotony ∧
     (polynomialNet T hT).EinsteinCausality ∧
-    (polynomialNet T hT).Covariant (polynomialCovariance T hT) := by
-  sorry
+    (polynomialNet T hT).Covariant (polynomialCovariance T hT) :=
+  ⟨polynomialNet_isotony T hT, polynomialNet_einsteinCausality T hT,
+    polynomialCovariance_covariant T hT⟩
 
 /-- The Yang–Mills hierarchies of the upstream result carry Haag–Kastler nets:
 the polynomial field net of the hierarchy's own Wightman theory. -/
