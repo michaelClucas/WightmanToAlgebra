@@ -149,8 +149,15 @@ so the counterexample refutes both formulations.
   it is the statement that ties the von Neumann net to the Wightman fields.
   `bounded_haagKastler` itself is the generic double-commutant fact and does not use the
   fields (the PI review's F2); docs now say so. `hT` in `boundedCovariance` and
-  `bounded_haagKastler` is unused; left in place since removing it changes those
-  signatures and costs nothing.
+  `bounded_haagKastler` is unused; first left in place, then removed in D10.
 - No instance of `BoundedLocalData` for a nontrivial theory is constructed (would need
   self-adjoint closures and spectral projections of unbounded operators). Recorded in
   `BLOCKERS.md` B3.
+
+## D10 (2026-11-12, PI review round 2, N3): drop unused `hT` from the bounded net
+
+Old: `boundedCovariance (T) (hT : T.Axioms) (B)`, and `boundedCovariance_apply`,
+`bounded_haagKastler` with `(hT : T.Axioms)`. New: the binder is removed. The proofs never
+used it (the linter flagged it), and its presence suggested the Wightman axioms enter the
+bounded-net result when they do not. Removing an unused hypothesis only strengthens the
+statements. Covariance is still `Ad U(g)` with `U(g) = onStates (coordinates.symm g)`.

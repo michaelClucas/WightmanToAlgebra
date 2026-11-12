@@ -75,10 +75,10 @@ sense of FR Def. 25.
 Stretch 3, bounded nets (`BoundedNet.lean`):
 
 ```lean
-theorem bounded_haagKastler (T : WightmanTheory H Labels) (hT : T.Axioms)
+theorem bounded_haagKastler (T : WightmanTheory H Labels)
     (B : BoundedLocalData T) :
     (boundedNet B).Isotony ∧ (boundedNet B).EinsteinCausality ∧
-      (boundedNet B).Covariant (boundedCovariance T hT B)
+      (boundedNet B).Covariant (boundedCovariance T B)
 ```
 
 `M(O) = S(O)''` with hypotheses: `S(O)` adjoint-closed, monotone, commuting at spacelike
@@ -159,7 +159,7 @@ No instance of `BoundedLocalData` is constructed for any nontrivial theory (B3).
 
 - **B3 No nontrivial `BoundedLocalData`.** Building one needs unbounded spectral theory.
 
-## Independent PI review (`REVIEW.md`)
+## Independent PI review (`REVIEW_ROUND1.md`, `REVIEW.md`)
 
 Verdict: sound, core claim faithful, fidelity issues in descriptions. Responses:
 
@@ -172,6 +172,12 @@ Verdict: sound, core claim faithful, fidelity issues in descriptions. Responses:
 | F5 wrong grep claim in TIMESLICE.md | Corrected; conclusion unchanged |
 | F6 `polynomialCovariance` had no DECISIONS entry | D7 |
 | F7 stale final commit | Updated at the top of this report |
+
+Round 2 (`REVIEW.md`, at `113066d`): **SOUND AND FAITHFUL**. Round 1 is kept as
+`REVIEW_ROUND1.md`. Round-2 notes: N1 AUDIT table row corrected; N2 no change (docs already
+say the bounded results are conditional); N3 unused `hT : T.Axioms` dropped from
+`boundedCovariance`, `boundedCovariance_apply`, `bounded_haagKastler` (D10); N4 handled by
+the file split.
 
 ## Process notes
 

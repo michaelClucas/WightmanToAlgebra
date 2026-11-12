@@ -154,24 +154,24 @@ theorem adU_mem_iff {T : WightmanTheory H Labels} (B : BoundedLocalData T)
   rw [← himg, mem_double_centralizer_map]
 
 /-- Covariance `A ↦ U(g) A U(g)*`. -/
-def boundedCovariance (T : WightmanTheory H Labels) (hT : T.Axioms) (B : BoundedLocalData T) :
+def boundedCovariance (T : WightmanTheory H Labels) (B : BoundedLocalData T) :
     (boundedNet B).Covariance where
   act g O := restrictStarAlgEquiv (adU T g) (boundedAlgebra B O) (boundedAlgebra B (O.map g))
     (adU_mem_iff B g O)
 
-theorem boundedCovariance_apply (T : WightmanTheory H Labels) (hT : T.Axioms)
+theorem boundedCovariance_apply (T : WightmanTheory H Labels)
     (B : BoundedLocalData T) (g : PoincareCoordinates) (O : Region)
     (a : boundedAlgebra B O) :
-    ((show boundedAlgebra B (O.map g) from (boundedCovariance T hT B).act g O a) : H.Operator) =
+    ((show boundedAlgebra B (O.map g) from (boundedCovariance T B).act g O a) : H.Operator) =
       unitaryOf T g * (a : H.Operator) * ContinuousLinearMap.adjoint (unitaryOf T g) := by
   rfl
 
 /-- Stretch 3: Haag–Kastler (isotony, Einstein causality, covariance) for the von
 Neumann net under the explicit hypotheses `BoundedLocalData`. -/
-theorem bounded_haagKastler (T : WightmanTheory H Labels) (hT : T.Axioms)
+theorem bounded_haagKastler (T : WightmanTheory H Labels)
     (B : BoundedLocalData T) :
     (boundedNet B).Isotony ∧ (boundedNet B).EinsteinCausality ∧
-      (boundedNet B).Covariant (boundedCovariance T hT B) := by
+      (boundedNet B).Covariant (boundedCovariance T B) := by
   refine ⟨⟨fun h ↦ StarSubalgebra.inclusion_injective _, fun O ↦ StarAlgHom.ext fun _ ↦ rfl,
     fun _ _ ↦ StarAlgHom.ext fun _ ↦ rfl⟩, ?_, ⟨?_, ?_, ?_⟩⟩
   · intro O₁ O₂ O h₁ h₂ hd a b

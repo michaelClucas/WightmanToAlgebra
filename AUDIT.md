@@ -137,7 +137,7 @@ A4 Poincare covariance, A5 existence of dynamics (timeslice). This audit uses FR
 | 4 | Group indexed by `PoincareCoordinates` rather than upstream `Symmetry` | `Covariance.act`, `domainEquiv` | HARMLESS | `coordinates` is a homeomorphism and `poincareMul`/`poincareOne` match `productCoordinates`/`identityCoordinates` |
 | 5 | Causal convexity as order convexity of the closed causal order | `Regions.lean` `CausallyConvex` | HARMLESS | Equivalent to FR's curve definition in Minkowski space |
 | 6 | Regions required nonempty | `Region.nonempty` | HARMLESS | Only removes ∅ from the index set |
-| 7 | Timeslice via `O₂ ⊆ D(O₁)` instead of "O1 contains a Cauchy surface of O2" | `Net.Timeslice` | HARMLESS | Close variant of FR A5, and timeslice is not claimed by any main theorem |
+| 7 | Timeslice via `O₂ ⊆ D(O₁)` instead of "O1 contains a Cauchy surface of O2" | `Net.Timeslice` | DIFFERENT HYPOTHESIS, UNCLAIMED | Not proved equivalent to FR A5 (corrected after PI review, see addendum and DECISIONS.md D8); no theorem claims timeslice |
 | 8 | Inextendibility encoded as time → ±∞ along a ℝ-parametrised monotone curve | `InextendibleCausalCurve` | HARMLESS | Equivalent in Minkowski space; only used by `Timeslice` |
 | 9 | Main theorems assume W0 though only W1-W3 are used | `Main.lean` | HARMLESS | Stronger hypothesis than needed; matches the "W0-W3" claim |
 | 10 | Timeslice omitted from main conclusions | `wightman_to_haagKastler`, `yangMills_haagKastler` | HARMLESS | Deliberate and documented; does not follow from W0-W3 for polynomial algebras |

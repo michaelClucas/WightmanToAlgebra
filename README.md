@@ -89,7 +89,7 @@ No `sorry` in `WightmanToAlgebra/`. Every headline theorem depends only on
 - [ ] Stretch 2, timeslice: false for polynomial nets of general Wightman theories, and the
       upstream construction gives no field equation (`TIMESLICE.md`, BLOCKERS.md B1)
 
-Final summary: `REPORT.md`. Independent PI review: `REVIEW.md` (responses in `REPORT.md`).
+Final summary: `REPORT.md`. Independent PI reviews: `REVIEW_ROUND1.md`, `REVIEW.md` (round 2: sound and faithful); responses in `REPORT.md`.
 
 ## Build
 
