@@ -75,3 +75,28 @@ This is checked when the covariance branch is merged and again in the Phase 5 au
   (adjoint-closed, monotone, spacelike commuting, covariant under `U(g)`, and fields
   localised in `O` affiliated with `S(O)''` on the domain, which excludes `S = ∅`).
 - Work happens on branch `phase6`; `main` stays sorry-free until each piece is proved.
+
+## D5 (2026-11-11): Phase 6 fidelity review; `BoundedLocalData.affiliated` strengthened
+
+Independent fidelity agent (saw FR, upstream spec and the new statement files only):
+`Vacuum.lean` and `WightmanVacuum.lean` faithful. `BoundedNet.lean`: REJECT on one item. The
+original `affiliated` field only constrained commutant elements `B` preserving the Wightman
+domain `D`; elements of `S(O)'` typically do not preserve `D`, so the field could hold
+vacuously and `S(O)` would not be tied to the fields.
+
+Old:
+```lean
+  affiliated (O) (l) (f) (hf : tsupport f ⊆ O.carrier) (B : H.Operator)
+      (hB : ∀ A ∈ S O, Commute A B)
+      (hD : Set.MapsTo B (T.fields.domain : Set H.carrier) T.fields.domain)
+      (u : T.fields.domain) :
+    B (T.fields.field l f u).1 = (T.fields.field l f ⟨B u.1, hD u.2⟩).1
+```
+New (reviewer's proposal, `B φ ⊆ (φ†)* B`, no domain invariance needed):
+```lean
+  affiliated (O) (l) (f) (hf : tsupport f ⊆ O.carrier) (B : H.Operator)
+      (hB : ∀ A ∈ S O, Commute A B) (u v : T.fields.domain) :
+    inner ℂ (T.fields.field (T.adjointLabel l) (conjugateTest f) v).1 (B u.1) =
+      inner ℂ v.1 (B (T.fields.field l f u).1)
+```
+Re-review of the fix requested (see D6).
