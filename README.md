@@ -45,6 +45,16 @@ builds the full construction.
   field algebras. Getting it needs either a dynamical input from the Yang–Mills
   construction or a passage to von Neumann algebras plus a timelike-tube
   argument.
+- **TBD: equation of motion from the upstream construction.** The upstream public
+  statement exports a Wightman theory whose fields are gauge-invariant composite
+  operators graded by scaling dimension (`Hierarchy.Field d`, e.g. `centeredTrace :
+  Field 4`), not the gauge potential `A_μ`. The Yang–Mills equation `D_μ F^{μν} = 0` is
+  a statement about `A_μ`, so it has no direct meaning for these fields, and nothing in
+  the exported statement is dynamical. Open question: can the construction (lattice
+  Wilson action, continuum limit) be made to export a quantum equation of motion, e.g.
+  Schwinger–Dyson identities for renormalized composite operators, in a form strong
+  enough to give timeslice? Even then, timeslice for an interacting theory is known only
+  perturbatively (Chilian–Fredenhagen 2009). See `TIMESLICE.md`.
 - **Bounded (von Neumann) nets** are proved under explicit hypotheses
   (`BoundedLocalData`: adjoint-closed, monotone, spacelike-commuting, covariant generating
   sets with the fields affiliated). Deriving those hypotheses from the Wightman fields needs
