@@ -26,3 +26,5 @@ Axioms of both main theorems: propext, Classical.choice, Quot.sound.
 ## Final
 
 All phases complete or blocked with reasons (B1, B2). Final code commit 45b6d23, CI run 43159539441 green.
+
+PI review addressed 2026-11-12: code commit ab86eb9, CI run 43270785975 green.

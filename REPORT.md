@@ -13,8 +13,8 @@ Its content beyond that hypothesis is the general Wightman result above applied 
 hierarchy's theory. Nothing here bears on dynamics, a mass gap, or anything that
 distinguishes Yang–Mills from a free or generalized free field.
 
-- Final code commit: FINAL_COMMIT
-- Green CI run: FINAL_CI
+- Final code commit: [`ab86eb9`](https://github.com/michaelClucas/WightmanToAlgebra/commit/ab86eb9) (later commits touch docs only)
+- Green CI run: [run 43270785975](https://github.com/michaelClucas/WightmanToAlgebra/actions/runs/43270785975) (success on `ab86eb9`)
 - No `sorry`, `axiom`, `opaque`, `implemented_by`, `native_decide` or `debug.skipKernelTC`
   in `WightmanToAlgebra/`. Upstream dependency and its pin unchanged.
 
@@ -171,7 +171,7 @@ Verdict: sound, core claim faithful, fidelity issues in descriptions. Responses:
 | F4 Timeslice differs from FR A5 | D8; AUDIT addendum |
 | F5 wrong grep claim in TIMESLICE.md | Corrected; conclusion unchanged |
 | F6 `polynomialCovariance` had no DECISIONS entry | D7 |
-| F7 stale final commit | Updated below |
+| F7 stale final commit | Updated at the top of this report |
 
 ## Process notes
 
