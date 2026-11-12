@@ -1,4 +1,5 @@
 import WightmanToAlgebra.HaagKastler
+import WightmanToAlgebra.Conjugation
 
 /-! The polynomial field net of a Wightman theory.
 
@@ -189,9 +190,224 @@ def polynomialNet (T : WightmanTheory H Labels) (hT : T.Axioms) : Net where
     { Subalgebra.inclusion (polynomialAlgebra_mono T.fields h) with
       map_star' := polyStar_inclusion T hT O₁.carrier h }
 
+/-! ## Covariance by unitary conjugation -/
+
+section Covariance
+
+open PoincareActionAux
+
+/-- A linear equivalence of the domain preserving inner products conjugates formal
+adjoints to formal adjoints. -/
+theorem isFormalAdjoint_conjAlgEquiv (F : FieldSystem H Labels)
+    (V : F.domain ≃ₗ[ℂ] F.domain)
+    (hV : ∀ a b : F.domain, inner ℂ (V a).1 (V b).1 = inner ℂ a.1 b.1)
+    {X Y : Module.End ℂ F.domain} (h : IsFormalAdjoint F X Y) :
+    IsFormalAdjoint F (V.conjAlgEquiv ℂ X) (V.conjAlgEquiv ℂ Y) := by
+  intro u v
+  show inner ℂ (V (X (V.symm u))).1 v.1 = inner ℂ u.1 (V (Y (V.symm v))).1
+  calc inner ℂ (V (X (V.symm u))).1 v.1
+      = inner ℂ (V (X (V.symm u))).1 (V (V.symm v)).1 := by rw [V.apply_symm_apply]
+    _ = inner ℂ (X (V.symm u)).1 (V.symm v).1 := hV _ _
+    _ = inner ℂ (V.symm u).1 (Y (V.symm v)).1 := h _ _
+    _ = inner ℂ (V (V.symm u)).1 (V (Y (V.symm v))).1 := (hV _ _).symm
+    _ = inner ℂ u.1 (V (Y (V.symm v))).1 := by rw [V.apply_symm_apply]
+
+variable (T : WightmanTheory H Labels) (hT : T.Axioms)
+
+/-- The symmetry with Poincaré coordinates `g`. -/
+abbrev symOf (g : PoincareCoordinates) : T.poincare.Symmetry :=
+  T.poincare.coordinates.symm g
+
+/-- `U(g)` restricted to the invariant domain `D` (W2), as a linear equivalence;
+the inverse is `U(g⁻¹)`. -/
+def domainEquiv (g : PoincareCoordinates) : T.fields.domain ≃ₗ[ℂ] T.fields.domain where
+  toFun u := ⟨T.poincare.onStates (symOf T g) u.1, hT.w2.domainInvariant _ u.2⟩
+  invFun u := ⟨T.poincare.onStates (symOf T (poincareInv g)) u.1,
+    hT.w2.domainInvariant _ u.2⟩
+  map_add' _ _ := Subtype.ext (map_add _ _ _)
+  map_smul' _ _ := Subtype.ext (map_smul _ _ _)
+  left_inv u := Subtype.ext (onStates_apply_apply _ (symm_inv_mul_symm _ g) u.1)
+  right_inv u := Subtype.ext (onStates_apply_apply _ (symm_mul_symm_inv _ g) u.1)
+
+theorem domainEquiv_apply (g : PoincareCoordinates) (u : T.fields.domain) :
+    (domainEquiv T hT g u).1 = T.poincare.onStates (symOf T g) u.1 := rfl
+
+theorem domainEquiv_inner (g : PoincareCoordinates) (a b : T.fields.domain) :
+    inner ℂ (domainEquiv T hT g a).1 (domainEquiv T hT g b).1 = inner ℂ a.1 b.1 :=
+  onStates_inner _ _ _ _
+
+theorem domainEquiv_poincareOne :
+    domainEquiv T hT poincareOne = LinearEquiv.refl ℂ T.fields.domain := by
+  ext u
+  rw [domainEquiv_apply, symOf, symm_poincareOne, T.poincare.identity]
+  rfl
+
+theorem domainEquiv_poincareMul (g h : PoincareCoordinates) :
+    domainEquiv T hT (poincareMul g h) = (domainEquiv T hT h).trans (domainEquiv T hT g) := by
+  ext u
+  rw [domainEquiv_apply, symOf, symm_poincareMul, T.poincare.composition]
+  rfl
+
+/-- Conjugation `X ↦ U(g) X U(g)⁻¹` on `End(D)`. -/
+def domainConj (g : PoincareCoordinates) :
+    Module.End ℂ T.fields.domain ≃ₐ[ℂ] Module.End ℂ T.fields.domain :=
+  (domainEquiv T hT g).conjAlgEquiv ℂ
+
+theorem domainConj_apply (g : PoincareCoordinates) (X : Module.End ℂ T.fields.domain)
+    (u : T.fields.domain) :
+    domainConj T hT g X u = domainEquiv T hT g (X ((domainEquiv T hT g).symm u)) := rfl
+
+theorem domainConj_poincareOne (X : Module.End ℂ T.fields.domain) :
+    domainConj T hT poincareOne X = X := by
+  ext u
+  rw [domainConj_apply, domainEquiv_poincareOne]
+  rfl
+
+theorem domainConj_poincareMul (g h : PoincareCoordinates)
+    (X : Module.End ℂ T.fields.domain) :
+    domainConj T hT g (domainConj T hT h X) = domainConj T hT (poincareMul g h) X := by
+  ext u
+  rw [domainConj_apply, domainConj_apply, domainConj_apply, domainEquiv_poincareMul]
+  rfl
+
+/-- W2 field covariance, as an identity in `End(D)`. -/
+theorem domainConj_field (g : PoincareCoordinates) (l : Labels.carrier) (f : TestFunction) :
+    domainConj T hT g (T.fields.field l f) =
+      T.fields.field (T.poincare.onLabels (symOf T g) l)
+        (T.poincare.onTests (symOf T g) f) := by
+  refine LinearMap.ext fun u => Subtype.ext ?_
+  rw [domainConj_apply, domainEquiv_apply, hT.w2.fieldCovariance]
+  have hu : (⟨T.poincare.onStates (symOf T g) ((domainEquiv T hT g).symm u).1,
+      hT.w2.domainInvariant _ ((domainEquiv T hT g).symm u).2⟩ : T.fields.domain) = u :=
+    (domainEquiv T hT g).apply_symm_apply u
+  rw [hu]
+
+theorem domainConj_image_localGenerators (g : PoincareCoordinates) (A : Set Spacetime) :
+    domainConj T hT g '' localGenerators T.fields A =
+      localGenerators T.fields (poincareAct g '' A) := by
+  have hcoord : T.poincare.coordinates (symOf T g) = g := Homeomorph.apply_symm_apply _ _
+  have hinj : Function.Injective (poincareAct g) := (poincareHomeomorph g).injective
+  ext Y
+  constructor
+  · rintro ⟨X, ⟨l, f, hf, rfl⟩, rfl⟩
+    refine ⟨_, _, ?_, domainConj_field T hT g l f⟩
+    rw [tsupport_onTests, hcoord]
+    exact Set.image_mono hf
+  · rintro ⟨l, f, hf, rfl⟩
+    have hst := symm_mul_symm_inv T.poincare g
+    refine ⟨T.fields.field ((T.poincare.onLabels (symOf T g)).symm l)
+      (T.poincare.onTests (symOf T (poincareInv g)) f), ⟨_, _, ?_, rfl⟩, ?_⟩
+    · have h2 : tsupport (T.poincare.onTests (symOf T g)
+          (T.poincare.onTests (symOf T (poincareInv g)) f) : Spacetime → ℂ) ⊆
+            poincareAct g '' A := by
+        rw [onTests_apply_apply _ hst]
+        exact hf
+      rw [tsupport_onTests, hcoord] at h2
+      exact (Set.image_subset_image_iff hinj).mp h2
+    · rw [domainConj_field, LinearEquiv.apply_symm_apply, onTests_apply_apply _ hst]
+
+theorem polynomialAlgebra_map_domainConj (g : PoincareCoordinates) (A : Set Spacetime) :
+    (polynomialAlgebra T.fields A).map (domainConj T hT g).toAlgHom =
+      polynomialAlgebra T.fields (poincareAct g '' A) := by
+  rw [polynomialAlgebra, AlgHom.map_adjoin, polynomialAlgebra,
+    ← domainConj_image_localGenerators T hT g A]
+  rfl
+
+theorem domainConj_mem (g : PoincareCoordinates) {A : Set Spacetime}
+    {X : Module.End ℂ T.fields.domain} (hX : X ∈ polynomialAlgebra T.fields A) :
+    domainConj T hT g X ∈ polynomialAlgebra T.fields (poincareAct g '' A) := by
+  rw [← polynomialAlgebra_map_domainConj T hT g]
+  exact Subalgebra.mem_map.mpr ⟨X, hX, rfl⟩
+
+theorem domainConj_symm_mem (g : PoincareCoordinates) {A : Set Spacetime}
+    {Y : Module.End ℂ T.fields.domain}
+    (hY : Y ∈ polynomialAlgebra T.fields (poincareAct g '' A)) :
+    (domainConj T hT g).symm Y ∈ polynomialAlgebra T.fields A := by
+  rw [← polynomialAlgebra_map_domainConj T hT g] at hY
+  obtain ⟨X, hX, rfl⟩ := Subalgebra.mem_map.mp hY
+  have : (domainConj T hT g).symm ((domainConj T hT g).toAlgHom X) = X :=
+    (domainConj T hT g).symm_apply_apply X
+  rw [this]
+  exact hX
+
+/-- The underlying endomorphism of an element of `P(O)`. -/
+def polyVal {O : Region} (X : (polynomialNet T hT).Alg O) : Module.End ℂ T.fields.domain :=
+  X.1
+
+theorem polyVal_injective (O : Region) :
+    Function.Injective (polyVal T hT (O := O)) :=
+  fun _ _ h => Subtype.ext h
+
+theorem polyVal_mem {O : Region} (X : (polynomialNet T hT).Alg O) :
+    polyVal T hT X ∈ polynomialAlgebra T.fields O.carrier :=
+  X.2
+
+/-- The star on `P(O)` is the chosen formal adjoint. -/
+theorem isFormalAdjoint_polyVal_star {O : Region} (X : (polynomialNet T hT).Alg O) :
+    IsFormalAdjoint T.fields (polyVal T hT X) (polyVal T hT (star X)) :=
+  (exists_formalAdjoint T hT O.carrier X.2).choose_spec.2
+
+theorem polynomialNet_incl_apply {O₁ O₂ : Region} (h : O₁.carrier ⊆ O₂.carrier)
+    (X : (polynomialNet T hT).Alg O₁) :
+    (polynomialNet T hT).incl h X = Subalgebra.inclusion (polynomialAlgebra_mono T.fields h) X :=
+  rfl
+
+-- Proved via `Subalgebra.coe_inclusion`: closing this by `rfl` makes the kernel time out.
+theorem polyVal_incl {O₁ O₂ : Region} (h : O₁.carrier ⊆ O₂.carrier)
+    (X : (polynomialNet T hT).Alg O₁) :
+    polyVal T hT ((polynomialNet T hT).incl h X) = polyVal T hT X := by
+  unfold polyVal
+  rw [polynomialNet_incl_apply]
+  exact Subalgebra.coe_inclusion _ _
+
+/-- The *-isomorphism `P(O) ≃ P(gO)`, `X ↦ U(g) X U(g)⁻¹`. -/
+def polynomialAct (g : PoincareCoordinates) (O : Region) :
+    (polynomialNet T hT).Alg O ≃⋆ₐ[ℂ] (polynomialNet T hT).Alg (O.map g) where
+  toFun X := ⟨domainConj T hT g (polyVal T hT X), domainConj_mem T hT g (polyVal_mem T hT X)⟩
+  invFun Y := ⟨(domainConj T hT g).symm (polyVal T hT Y),
+    domainConj_symm_mem T hT g (polyVal_mem T hT Y)⟩
+  left_inv X := Subtype.ext ((domainConj T hT g).symm_apply_apply _)
+  right_inv Y := Subtype.ext ((domainConj T hT g).apply_symm_apply _)
+  map_mul' X Y := Subtype.ext (map_mul (domainConj T hT g) _ _)
+  map_add' X Y := Subtype.ext (map_add (domainConj T hT g) _ _)
+  map_star' X := by
+    apply polyVal_injective
+    exact formalAdjoint_unique T.fields hT.w1.domain
+      (isFormalAdjoint_conjAlgEquiv T.fields (domainEquiv T hT g) (domainEquiv_inner T hT g)
+        (isFormalAdjoint_polyVal_star T hT X))
+      (isFormalAdjoint_polyVal_star T hT (O := O.map g)
+        ⟨domainConj T hT g (polyVal T hT X), domainConj_mem T hT g (polyVal_mem T hT X)⟩)
+  map_smul' c X := Subtype.ext (map_smul (domainConj T hT g) c _)
+
+theorem polyVal_polynomialAct (g : PoincareCoordinates) (O : Region)
+    (X : (polynomialNet T hT).Alg O) :
+    polyVal T hT (polynomialAct T hT g O X) = domainConj T hT g (polyVal T hT X) :=
+  rfl
+
+end Covariance
+
 /-- `P(O) → P(gO)`, `X ↦ U(g) X U(g)⁻¹` restricted to the invariant domain. -/
 def polynomialCovariance (T : WightmanTheory H Labels) (hT : T.Axioms) :
     (polynomialNet T hT).Covariance :=
-  sorry
+  ⟨polynomialAct T hT⟩
+
+theorem polynomialCovariance_covariant (T : WightmanTheory H Labels) (hT : T.Axioms) :
+    (polynomialNet T hT).Covariant (polynomialCovariance T hT) where
+  natural g _ _ h a := by
+    apply polyVal_injective
+    change polyVal T hT ((polynomialNet T hT).incl _ (polynomialAct T hT g _ a)) =
+      polyVal T hT (polynomialAct T hT g _ ((polynomialNet T hT).incl h a))
+    rw [polyVal_incl, polyVal_polynomialAct, polyVal_polynomialAct, polyVal_incl]
+  one O a := by
+    apply polyVal_injective
+    change polyVal T hT (polynomialAct T hT poincareOne O a) =
+      polyVal T hT ((polynomialNet T hT).incl _ a)
+    rw [polyVal_incl, polyVal_polynomialAct, domainConj_poincareOne]
+  mul g h O a := by
+    apply polyVal_injective
+    change polyVal T hT (polynomialAct T hT g _ (polynomialAct T hT h O a)) =
+      polyVal T hT ((polynomialNet T hT).incl _ (polynomialAct T hT (poincareMul g h) O a))
+    rw [polyVal_incl, polyVal_polynomialAct, polyVal_polynomialAct, polyVal_polynomialAct,
+      domainConj_poincareMul]
 
 end WightmanToAlgebra
