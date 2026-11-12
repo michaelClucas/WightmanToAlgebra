@@ -18,6 +18,11 @@ axiom systems are stated over the same `Spacetime`, `forwardCone`,
 | `WightmanToAlgebra/HaagKastler.lean` | `Net` and the axioms: isotony, Einstein causality, timeslice, covariance |
 | `WightmanToAlgebra/PolynomialNet.lean` | `O ↦ P(O)`, the unital algebra of smeared fields supported in `O`, with the formal adjoint as *-operation |
 | `WightmanToAlgebra/Main.lean` | `wightman_to_haagKastler` and `yangMills_haagKastler` |
+| `WightmanToAlgebra/Conjugation.lean`, `Locality.lean` | helpers: Poincaré inverses, conjugation, W3 on generated algebras |
+| `WightmanToAlgebra/DoubleCone.lean` | double cone regions, directedness of regions |
+| `WightmanToAlgebra/Vacuum.lean` | states, GNS representations and their uniqueness, spectrum condition, vacuum |
+| `WightmanToAlgebra/WightmanVacuum.lean` (+`Aux`) | the Wightman vacuum is a vacuum state; GNS recovers the fields |
+| `WightmanToAlgebra/BoundedNet.lean` | von Neumann net `S(O)''` under explicit hypotheses |
 
 ## Approach
 
@@ -40,31 +45,34 @@ builds the full construction.
   field algebras. Getting it needs either a dynamical input from the Yang–Mills
   construction or a passage to von Neumann algebras plus a timelike-tube
   argument.
-- **Bounded (C*/von Neumann) nets.** Passing to bounded operators needs extra
-  hypotheses on the Wightman fields (e.g. strong commutativity of
-  spectral projections at spacelike separation). Not attempted yet.
-- **Vacuum state / spectrum condition** on the net side (vacuum as a state on the
-  quasi-local algebra, GNS recovering the Wightman Hilbert space) is not yet stated.
+- **Bounded (von Neumann) nets** are proved under explicit hypotheses
+  (`BoundedLocalData`: adjoint-closed, monotone, spacelike-commuting, covariant generating
+  sets with the fields affiliated). Deriving those hypotheses from the Wightman fields needs
+  unbounded spectral theory not in Mathlib.
+- **Vacuum / spectrum condition**: proved (`WightmanVacuum.lean`). Open: the GNS space
+  `closure(A(M)Ω)` equals `H` (BLOCKERS.md B2).
 
 ## Status
 
-Phases 0–4 complete: no `sorry` in `WightmanToAlgebra/`, and
+No `sorry` in `WightmanToAlgebra/`. Every headline theorem depends only on
+`propext`, `Classical.choice`, `Quot.sound`.
 
-```
-'WightmanToAlgebra.wightman_to_haagKastler' depends on axioms: [propext, Classical.choice, Quot.sound]
-'WightmanToAlgebra.yangMills_haagKastler' depends on axioms: [propext, Classical.choice, Quot.sound]
-```
+- [x] Geometry: Lorentz closure, Poincaré action on regions (`Regions.lean`)
+- [x] *-structure: formal adjoint, `StarRing`, `StarModule`, star-preserving inclusions
+- [x] Covariance: conjugation by `U(g)` on the domain, covariance laws
+- [x] `wightman_to_haagKastler`: isotony, Einstein causality, covariance
+- [x] `yangMills_haagKastler`, strengthened to the hierarchy's own net (DECISIONS.md D3)
+- [x] Phase 5 audit (`AUDIT.md`): fidelity PASS, soundness PASS
+- [x] Stretch 1 (`Vacuum.lean`, `WightmanVacuum.lean`): states, GNS uniqueness, spectrum
+      condition, vacuum state; the Wightman vacuum is a Poincaré-invariant vacuum and every
+      GNS representation is unitarily equivalent to the fields on `A(M)Ω`
+      (gap: `closure(A(M)Ω) = H` not proved, BLOCKERS.md B2)
+- [x] Stretch 3 (`BoundedNet.lean`): Haag–Kastler for `M(O) = S(O)''` under explicit
+      hypotheses `BoundedLocalData`
+- [ ] Stretch 2, timeslice: false for polynomial nets of general Wightman theories, and the
+      upstream construction gives no field equation (`TIMESLICE.md`, BLOCKERS.md B1)
 
-- [x] `properLorentz_mul_mem`, `properLorentz_one_mem`
-- [x] `poincareAct_isOpen`, `poincareAct_bounded`, `poincareAct_causallyConvex`
-- [x] `Region.map_one`, `Region.map_mul`
-- [x] `formalAdjoint_unique`, `exists_formalAdjoint`
-- [x] `polyStarRing`, `polyStarModule`, `map_star'` of inclusions
-- [x] `polynomialCovariance` (conjugation by `U(g)` on the domain) and `polynomialCovariance_covariant`
-- [x] `wightman_to_haagKastler`
-- [x] `yangMills_haagKastler`, strengthened so the net is the hierarchy's own polynomial net (DECISIONS.md D3)
-- [x] Phase 5 audit (`AUDIT.md`): fidelity PASS (11 deviations, all harmless), soundness PASS
-- [ ] Phase 6 stretch: vacuum/GNS, timeslice, bounded nets
+Final summary: `REPORT.md`.
 
 ## Build
 

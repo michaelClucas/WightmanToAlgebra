@@ -14,9 +14,9 @@ Single source of truth for the overseer run. Updated after every merge.
 | isotony, Einstein causality | Main.lean, Locality.lean | main agent + overseer | done | 2 | agent proofs hit kernel deterministic timeout once real star was merged (`Subtype.ext rfl` unfolds `choose`); overseer rewrote via `polyVal_incl` |
 | `wightman_to_haagKastler` | Main.lean | overseer | done | 1 | |
 | Phase 5 audit | AUDIT.md | audit agents | done: FIDELITY PASS, SOUNDNESS PASS | 1 | |
-| Phase 6.1 vacuum | | | todo | 0 | |
-| Phase 6.2 timeslice | | | todo | 0 | |
-| Phase 6.3 bounded nets | | | todo | 0 | |
+| Phase 6.1 vacuum | Vacuum.lean, WightmanVacuum.lean | 2 agents | done (gap B2) | 1 | |
+| Phase 6.2 timeslice | TIMESLICE.md | research agent | blocked (B1, false in general) | 1 | |
+| Phase 6.3 bounded nets | BoundedNet.lean | agent | done | 1 | statement fix D5/D6 |
 
 Issues: #1 Phase 0 (closed), #2-#4 geometry, #5-#6 star, #7 covariance, #8-#10 main, #11-#12 audit, #13-#16 stretch.
 
