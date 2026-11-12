@@ -4,5 +4,6 @@ import WightmanToAlgebra.PolynomialNet
 import WightmanToAlgebra.Main
 import WightmanToAlgebra.DoubleCone
 import WightmanToAlgebra.Vacuum
+import WightmanToAlgebra.WightmanVacuumAux
 import WightmanToAlgebra.WightmanVacuum
 import WightmanToAlgebra.BoundedNet
