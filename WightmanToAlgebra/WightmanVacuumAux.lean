@@ -1,6 +1,6 @@
 import WightmanToAlgebra.Vacuum
 
-/-! Helpers for `WightmanVacuum.lean`: a concrete region (so `Region` is nonempty),
+/-! Helpers for `WightmanVacuum.lean`: a fixed region,
 `polyVal` algebra lemmas, the cyclic subspace `A(M) Ω ⊆ H`, its closure `K`, and
 the translations restricted to `K`. -/
 
@@ -11,113 +11,13 @@ namespace WightmanToAlgebra
 
 open YangMills MeasureTheory
 
-/-! ## A concrete region: the open double cone around the origin -/
-
-/-- The open forward light cone. -/
-def openForwardCone : Set Spacetime := {x | ‖spatial x‖ < time x}
-
-theorem spatial_add (x y : Spacetime) : spatial (x + y) = spatial x + spatial y := by
-  ext i; simp [spatial]
-
-theorem spatial_sub (x y : Spacetime) : spatial (x - y) = spatial x - spatial y := by
-  ext i; simp [spatial]
-
-theorem time_add (x y : Spacetime) : time (x + y) = time x + time y := by
-  simp [time]
-
-theorem time_sub (x y : Spacetime) : time (x - y) = time x - time y := by
-  simp [time]
-
-theorem continuous_spatial : Continuous spatial := by
-  unfold spatial
-  exact (PiLp.continuous_toLp 2 _).comp (continuous_pi fun i => continuous_apply _ |>.comp
-    (PiLp.continuous_ofLp 2 _))
-
-theorem continuous_time : Continuous time := by
-  unfold time
-  exact (continuous_apply _).comp (PiLp.continuous_ofLp 2 _)
+/-! ## Regions -/
 
 theorem isClosed_forwardCone : IsClosed forwardCone :=
   isClosed_le (continuous_norm.comp continuous_spatial) continuous_time
 
-theorem openForwardCone_add {x y : Spacetime} (hx : x ∈ openForwardCone)
-    (hy : y ∈ forwardCone) :
-    x + y ∈ openForwardCone := by
-  show ‖spatial (x + y)‖ < time (x + y)
-  rw [spatial_add, time_add]
-  have hx' : ‖spatial x‖ < time x := hx
-  have hy' : ‖spatial y‖ ≤ time y := hy
-  linarith [norm_add_le (spatial x) (spatial y)]
-
-/-- Unit time vector. -/
-def timeUnit : Spacetime := EuclideanSpace.single timeAxis 1
-
-theorem spatial_timeUnit : spatial timeUnit = 0 := by
-  ext i
-  simp [spatial, timeUnit, Fin.castSucc_ne_last]
-
-theorem time_timeUnit : time timeUnit = 1 := by
-  simp [time, timeUnit]
-
-theorem norm_sq_eq_spatial_time (y : Spacetime) :
-    ‖y‖ ^ 2 = ‖spatial y‖ ^ 2 + time y ^ 2 := by
-  rw [EuclideanSpace.norm_sq_eq, EuclideanSpace.norm_sq_eq, Fin.sum_univ_castSucc]
-  simp [spatial, time]
-  rfl
-
-theorem mem_openForwardCone {x : Spacetime} : x ∈ openForwardCone ↔ ‖spatial x‖ < time x :=
-  Iff.rfl
-
-/-- Carrier of the unit double cone. -/
-def unitDiamondSet : Set Spacetime :=
-  {y | y + timeUnit ∈ openForwardCone ∧ timeUnit - y ∈ openForwardCone}
-
-theorem unitDiamondSet_isOpen : IsOpen unitDiamondSet := by
-  have hV : IsOpen openForwardCone :=
-    isOpen_lt (continuous_norm.comp continuous_spatial) continuous_time
-  have h : unitDiamondSet = (fun y => y + timeUnit) ⁻¹' openForwardCone ∩
-      (fun y => timeUnit - y) ⁻¹' openForwardCone := rfl
-  rw [h]
-  exact (hV.preimage (continuous_id.add continuous_const)).inter
-    (hV.preimage (continuous_const.sub continuous_id))
-
-theorem unitDiamondSet_bounded : Bornology.IsBounded unitDiamondSet := by
-  rw [Metric.isBounded_iff_subset_closedBall 0]
-  refine ⟨3, fun y hy => ?_⟩
-  obtain ⟨h1, h2⟩ := hy
-  rw [mem_openForwardCone, spatial_add, spatial_timeUnit, add_zero, time_add,
-    time_timeUnit] at h1
-  rw [mem_openForwardCone, spatial_sub, spatial_timeUnit, zero_sub, norm_neg, time_sub,
-    time_timeUnit] at h2
-  have hs := norm_nonneg (spatial y)
-  have hn := norm_sq_eq_spatial_time y
-  rw [Metric.mem_closedBall, dist_zero_right]
-  nlinarith [norm_nonneg y]
-
-theorem zero_mem_unitDiamondSet : (0 : Spacetime) ∈ unitDiamondSet := by
-  refine ⟨?_, ?_⟩
-  · rw [zero_add, mem_openForwardCone, spatial_timeUnit, time_timeUnit]
-    simp
-  · rw [sub_zero, mem_openForwardCone, spatial_timeUnit, time_timeUnit]
-    simp
-
-theorem unitDiamondSet_causallyConvex : CausallyConvex unitDiamondSet := by
-  rintro x ⟨hx1, -⟩ z ⟨-, hz2⟩ y hxy hyz
-  refine ⟨?_, ?_⟩
-  · have := openForwardCone_add hx1 hxy
-    rwa [show x + timeUnit + (y - x) = y + timeUnit by abel] at this
-  · have := openForwardCone_add hz2 hyz
-    rwa [show timeUnit - z + (z - y) = timeUnit - y by abel] at this
-
-/-- The open double cone `{y | y + e ∈ V₊°, e - y ∈ V₊°}`, `e` the unit time vector. -/
-def unitDiamond : Region where
-  carrier := unitDiamondSet
-  isOpen := unitDiamondSet_isOpen
-  bounded := unitDiamondSet_bounded
-  nonempty := ⟨0, zero_mem_unitDiamondSet⟩
-  causallyConvex := unitDiamondSet_causallyConvex
-
-instance : Nonempty Region := ⟨unitDiamond⟩
+/-- A fixed region, so that `0 ∈ A(M) Ω` and `Ω ∈ A(M) Ω`. -/
+def unitDiamond : Region := doubleCone 1 one_pos
 
 /-! ## `polyVal` lemmas -/
 
