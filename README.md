@@ -63,7 +63,7 @@ Phases 0–4 complete: no `sorry` in `WightmanToAlgebra/`, and
 - [x] `polynomialCovariance` (conjugation by `U(g)` on the domain) and `polynomialCovariance_covariant`
 - [x] `wightman_to_haagKastler`
 - [x] `yangMills_haagKastler`, strengthened so the net is the hierarchy's own polynomial net (DECISIONS.md D3)
-- [ ] Phase 5 audit (`AUDIT.md`)
+- [x] Phase 5 audit (`AUDIT.md`): fidelity PASS (11 deviations, all harmless), soundness PASS
 - [ ] Phase 6 stretch: vacuum/GNS, timeslice, bounded nets
 
 ## Build

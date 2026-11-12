@@ -18,7 +18,7 @@ The run is restricted to this directory, so `ELAN_HOME=.elan`, `XDG_CACHE_HOME=.
   `starRing` field uses.
 - `polyStar`, `polyStarRing` marked `@[reducible]` (Lean 4.32 requires it for defs of class
   type); `polyStarModule` is a `Prop`, so `def` became `theorem`.
-None of `HaagKastler.lean`, `Regions.lean` or `Main.lean` changed.
+None of `HaagKastler.lean`, `Regions.lean` or `Main.lean` changed in Phase 0 (later phases only fill proofs there, plus D3).
 
 ## D3 (2026-11-11): strengthen `yangMills_haagKastler` (issue #10)
 

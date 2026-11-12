@@ -13,7 +13,7 @@ Single source of truth for the overseer run. Updated after every merge.
 | `polynomialCovariance` + covariance laws | PolynomialNet.lean, Conjugation.lean | covariance agent | done (merged e5358e0) | 1 | |
 | isotony, Einstein causality | Main.lean, Locality.lean | main agent + overseer | done | 2 | agent proofs hit kernel deterministic timeout once real star was merged (`Subtype.ext rfl` unfolds `choose`); overseer rewrote via `polyVal_incl` |
 | `wightman_to_haagKastler` | Main.lean | overseer | done | 1 | |
-| Phase 5 audit | AUDIT.md | audit agents | todo | 0 | |
+| Phase 5 audit | AUDIT.md | audit agents | done: FIDELITY PASS, SOUNDNESS PASS | 1 | |
 | Phase 6.1 vacuum | | | todo | 0 | |
 | Phase 6.2 timeslice | | | todo | 0 | |
 | Phase 6.3 bounded nets | | | todo | 0 | |
