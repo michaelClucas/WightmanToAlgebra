@@ -3,5 +3,6 @@ import WightmanToAlgebra.HaagKastler
 import WightmanToAlgebra.PolynomialNet
 import WightmanToAlgebra.Main
 import WightmanToAlgebra.Vacuum
+import WightmanToAlgebra.WightmanVacuumAux
 import WightmanToAlgebra.WightmanVacuum
 import WightmanToAlgebra.BoundedNet
