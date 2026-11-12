@@ -117,8 +117,9 @@ theorem wightmanVacuum_isVacuum (T : WightmanTheory H Labels) (hT : T.Axioms) :
     exact ⟨c, Subtype.ext hc.symm⟩
 
 /-- Stretch 1: every GNS representation of the Wightman vacuum is unitarily
-equivalent to the Wightman fields acting on `A(M) Ω`. -/
-theorem gns_recovers_wightman (T : WightmanTheory H Labels) (hT : T.Axioms)
+equivalent to `wightmanGNS`, i.e. to the Wightman fields acting on `A(M) Ω` inside
+`closure(A(M) Ω) ⊆ H`. Whether `closure(A(M) Ω) = H` is open (BLOCKERS.md B2). -/
+theorem gnsRepresentation_equivalent_wightmanGNS (T : WightmanTheory H Labels) (hT : T.Axioms)
     (R : (polynomialNet T hT).GNSRepresentation (wightmanVacuum T hT)) :
     R.Equivalent (wightmanGNS T hT) :=
   R.equivalent _

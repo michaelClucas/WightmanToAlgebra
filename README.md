@@ -21,7 +21,7 @@ axiom systems are stated over the same `Spacetime`, `forwardCone`,
 | `WightmanToAlgebra/Conjugation.lean`, `Locality.lean` | helpers: Poincaré inverses, conjugation, W3 on generated algebras |
 | `WightmanToAlgebra/DoubleCone.lean` | double cone regions, directedness of regions |
 | `WightmanToAlgebra/Vacuum.lean` | states, GNS representations and their uniqueness, spectrum condition, vacuum |
-| `WightmanToAlgebra/WightmanVacuum.lean` (+`Aux`) | the Wightman vacuum is a vacuum state; GNS recovers the fields |
+| `WightmanToAlgebra/WightmanVacuum.lean` (+`Aux`) | the Wightman vacuum is a vacuum state; its GNS representation is the fields acting on `A(M)Ω` inside `closure(A(M)Ω)` (equality with `H` open, B2) |
 | `WightmanToAlgebra/BoundedNet.lean` | von Neumann net `S(O)''` under explicit hypotheses |
 
 ## Approach
@@ -57,8 +57,12 @@ builds the full construction.
   perturbatively (Chilian–Fredenhagen 2009). See `TIMESLICE.md`.
 - **Bounded (von Neumann) nets** are proved under explicit hypotheses
   (`BoundedLocalData`: adjoint-closed, monotone, spacelike-commuting, covariant generating
-  sets with the fields affiliated). Deriving those hypotheses from the Wightman fields needs
-  unbounded spectral theory not in Mathlib.
+  sets, with the fields weakly affiliated, `B φ ⊆ (φ†)* B` for `B ∈ S(O)'`; this is weaker
+  than affiliation of the closures when `φ` is not essentially self-adjoint). The
+  Haag–Kastler part is the generic fact about double commutants and does not use the
+  fields; the link to the fields is `boundedAlgebra_weakCommute_field`. No instance of
+  `BoundedLocalData` is constructed for any nontrivial theory: deriving the hypotheses
+  needs unbounded spectral theory not in Mathlib.
 - **Vacuum / spectrum condition**: proved (`WightmanVacuum.lean`). Open: the GNS space
   `closure(A(M)Ω)` equals `H` (BLOCKERS.md B2).
 
@@ -71,18 +75,21 @@ No `sorry` in `WightmanToAlgebra/`. Every headline theorem depends only on
 - [x] *-structure: formal adjoint, `StarRing`, `StarModule`, star-preserving inclusions
 - [x] Covariance: conjugation by `U(g)` on the domain, covariance laws
 - [x] `wightman_to_haagKastler`: isotony, Einstein causality, covariance
-- [x] `yangMills_haagKastler`, strengthened to the hierarchy's own net (DECISIONS.md D3)
+- [x] `yangMills_haagKastler`, strengthened to the hierarchy's own net (DECISIONS.md D3); conditional on the upstream
+      `JointExistence`, which this repo does not check, and adds nothing beyond the general
+      Wightman result for that theory
 - [x] Phase 5 audit (`AUDIT.md`): fidelity PASS, soundness PASS
 - [x] Stretch 1 (`Vacuum.lean`, `WightmanVacuum.lean`): states, GNS uniqueness, spectrum
       condition, vacuum state; the Wightman vacuum is a Poincaré-invariant vacuum and every
       GNS representation is unitarily equivalent to the fields on `A(M)Ω`
       (gap: `closure(A(M)Ω) = H` not proved, BLOCKERS.md B2)
 - [x] Stretch 3 (`BoundedNet.lean`): Haag–Kastler for `M(O) = S(O)''` under explicit
-      hypotheses `BoundedLocalData`
+      hypotheses `BoundedLocalData` (generic double-commutant fact; link to the fields in
+      `boundedAlgebra_weakCommute_field`; no nontrivial instance constructed, B3)
 - [ ] Stretch 2, timeslice: false for polynomial nets of general Wightman theories, and the
       upstream construction gives no field equation (`TIMESLICE.md`, BLOCKERS.md B1)
 
-Final summary: `REPORT.md`.
+Final summary: `REPORT.md`. Independent PI review: `REVIEW.md` (responses in `REPORT.md`).
 
 ## Build
 

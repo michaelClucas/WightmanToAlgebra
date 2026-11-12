@@ -213,3 +213,16 @@ Meaning of all four named definitions preserved.
 - `git -C .lake/packages/ym_core rev-parse HEAD`: `3456e5e75cf8d4cd558955a5c7638fba2d68f464`.
 - `git -C .lake/packages/ym_core status --short`: `?? .lake/` only (build output dir, untracked). `git diff --stat`: empty. No tracked file modified.
 - `ChallengeSpec` (imported by Main) resolves to `.lake/packages/ym_core/ChallengeSpec.lean`, i.e. the pinned upstream.
+
+---
+
+# Addendum (2026-11-12, after independent PI review `REVIEW.md`)
+
+- The timeslice deviation in the table above is not proved harmless: `dependenceDomain`
+  (inextendible causal curves) and FR A5's "contains a Cauchy surface of `O₂`" (timelike
+  curves in `O₂`) are different hypotheses. No theorem claims timeslice, so no result is
+  affected. See DECISIONS.md D8.
+- `polynomialCovariance` and the other Phase 6 definitions supplied as data now have a
+  DECISIONS entry (D7).
+- PI review verdict: sound; core claim faithful; findings F1–F7 addressed as described in
+  REPORT.md.

@@ -202,4 +202,21 @@ theorem bounded_haagKastler (T : WightmanTheory H Labels) (hT : T.Axioms)
       ← ContinuousLinearMap.star_eq_adjoint, star_mul]
     simp only [mul_assoc]
 
+/-- The link between the von Neumann net and the Wightman fields: every element of
+`M(O₂)` commutes weakly (`A φ ⊆ (φ†)* A`, tested on `D`) with each smeared field
+localised in a region `O` causally disjoint from `O₂`. Uses `commute`, `adjoint_mem`
+and `affiliated`. -/
+theorem boundedAlgebra_weakCommute_field {T : WightmanTheory H Labels}
+    (B : BoundedLocalData T) {O O₂ : Region} (hd : CausallyDisjoint O.carrier O₂.carrier)
+    (l : Labels.carrier) (f : TestFunction) (hf : tsupport (f : Spacetime → ℂ) ⊆ O.carrier)
+    (A : H.Operator) (hA : A ∈ boundedAlgebra B O₂) (u v : T.fields.domain) :
+    inner ℂ (T.fields.field (T.adjointLabel l) (conjugateTest f) v).1 (A u.1) =
+      inner ℂ v.1 (A (T.fields.field l f u).1) := by
+  have hS : B.S O ⊆ (StarSubalgebra.centralizer ℂ (B.S O₂) : Set H.Operator) :=
+    fun A' hA' ↦ (StarSubalgebra.mem_centralizer_iff ℂ).2 fun g hg ↦
+      ⟨(B.commute hd A' hA' g hg).eq.symm, (B.commute hd A' hA' _ (B.adjoint_mem hg)).eq.symm⟩
+  have hA' : A ∈ StarSubalgebra.centralizer ℂ (B.S O) :=
+    StarSubalgebra.centralizer_le ℂ _ _ hS hA
+  exact B.affiliated O l f hf A (fun A' h ↦ (((StarSubalgebra.mem_centralizer_iff ℂ).1 hA') A' h).1) u v
+
 end WightmanToAlgebra

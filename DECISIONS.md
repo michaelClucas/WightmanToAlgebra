@@ -107,3 +107,50 @@ Second independent agent: the new `affiliated` is the weak form of `B φ ⊆ (φ
 order matching W1's `AdjointAxiom`; non-vacuous (with `S(O)` empty or scalar, rank-one `B`
 would force every field localised in `O` to act as a scalar); satisfiable in the intended
 example under strong locality; consistent.
+
+## D7 (2026-11-12, retroactive, PI review F6): definitions supplied as data
+
+These were `sorry` in the statement files and their bodies determine what the theorems mean.
+They should have had entries when they were filled in.
+
+- `polynomialCovariance` (`PolynomialNet.lean`, filled in `93bf718`, merged `e5358e0`):
+  `act g O X := domainConj g X`, i.e. `X ↦ V X V⁻¹` with
+  `V = onStates (coordinates.symm g)` restricted to the Wightman domain (W2
+  `domainInvariant`), inverse `onStates (coordinates.symm (poincareInv g))`. This is the
+  construction the scaffold docstring specified and the D3 approval was conditioned on;
+  checked independently in `AUDIT.md` and the PI review.
+- `wightmanVacuum`, `wightmanGNS` (`WightmanVacuum.lean`): pinned by `wightmanVacuum_apply`
+  (`ω(X) = ⟨Ω, XΩ⟩`) and `wightmanGNS_spec` (isometric embedding of the GNS domain into
+  `D`, `Ω ↦ Ω`, intertwining the field polynomials).
+- `boundedCovariance` (`BoundedNet.lean`): pinned by `boundedCovariance_apply`
+  (`A ↦ U(g) A U(g)*`).
+
+## D8 (2026-11-12, PI review F4): `Net.Timeslice` differs from FR A5; left unchanged
+
+FR A5: "If O₁ ⊂ O₂ and O₁ contains a Cauchy surface of O₂ then A(O₂) = A(O₁)", where a
+Cauchy surface of `O₂` is met exactly once by every inextendible timelike curve in `O₂`.
+`HaagKastler.lean` states it with `O₂ ⊆ dependenceDomain O₁` (inextendible causal curves in
+all of Minkowski space). The two hypotheses are not shown equivalent, and the earlier audit
+called the difference harmless without proof. Decision: leave the definition as is, because
+timeslice is not claimed by any theorem, and changing `HaagKastler.lean` needs a faithful
+formalization of Cauchy surfaces of a region plus fidelity sign-off, which buys nothing while
+timeslice stays unproved. The GFF counterexample in `TIMESLICE.md` uses a double cone `O₂`
+and a slab `O₁ = O₂ ∩ {|t| < ε}`; `O₁` contains the Cauchy surface `O₂ ∩ {t = 0}` of `O₂`,
+so the counterexample refutes both formulations.
+
+## D9 (2026-11-12, PI review F2, F3): rename and new theorem in Phase 6 files
+
+- `gns_recovers_wightman` renamed to `gnsRepresentation_equivalent_wightmanGNS`
+  (statement unchanged). The old name suggested the full Wightman representation on `H` is
+  recovered; only `closure(A(M)Ω)` is (BLOCKERS.md B2).
+- New theorem `boundedAlgebra_weakCommute_field` (`BoundedNet.lean`): every element of
+  `M(O₂)` satisfies `A φ ⊆ (φ†)* A` on `D` for fields localised in a region causally
+  disjoint from `O₂`. It is the first result that uses `BoundedLocalData.affiliated`, and
+  it is the statement that ties the von Neumann net to the Wightman fields.
+  `bounded_haagKastler` itself is the generic double-commutant fact and does not use the
+  fields (the PI review's F2); docs now say so. `hT` in `boundedCovariance` and
+  `bounded_haagKastler` is unused; left in place since removing it changes those
+  signatures and costs nothing.
+- No instance of `BoundedLocalData` for a nontrivial theory is constructed (would need
+  self-adjoint closures and spectral projections of unbounded operators). Recorded in
+  `BLOCKERS.md` B3.

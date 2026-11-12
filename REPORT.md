@@ -1,13 +1,20 @@
 # Final report
 
-Lean 4 (v4.32.0) proof that the Wightman theory of the Yang–Mills construction
-([yang-mills-group/OpenAI-YM-20261028](https://github.com/yang-mills-group/OpenAI-YM-20261028),
-pinned at `3456e5e`, W0–W3 in `PublicTheory.lean`) yields a net of local unital *-algebras
-satisfying the Haag–Kastler axioms as formulated in Fewster–Rejzner (arXiv:1904.04051):
-isotony, Einstein causality and Poincaré covariance. Timeslice is not claimed (see below).
+Lean 4 (v4.32.0) proof that every Wightman theory satisfying the upstream axioms W0–W3
+(`PublicTheory.lean` of
+[yang-mills-group/OpenAI-YM-20261028](https://github.com/yang-mills-group/OpenAI-YM-20261028),
+pinned at `3456e5e`) yields a net of local unital *-algebras satisfying the Haag–Kastler
+axioms as formulated in Fewster–Rejzner (arXiv:1904.04051): isotony, Einstein causality and
+Poincaré covariance. Timeslice is not claimed (see below).
 
-- Final code commit: [`45b6d23`](https://github.com/michaelClucas/WightmanToAlgebra/commit/45b6d23)
-- Green CI run: [run 43159539441](https://github.com/michaelClucas/WightmanToAlgebra/actions/runs/43159539441) (success on `45b6d23`)
+**The Yang–Mills statement is conditional.** `yangMills_haagKastler` assumes the upstream
+`JointExistence` as a hypothesis; this repo neither imports nor checks its upstream proof.
+Its content beyond that hypothesis is the general Wightman result above applied to the
+hierarchy's theory. Nothing here bears on dynamics, a mass gap, or anything that
+distinguishes Yang–Mills from a free or generalized free field.
+
+- Final code commit: FINAL_COMMIT
+- Green CI run: FINAL_CI
 - No `sorry`, `axiom`, `opaque`, `implemented_by`, `native_decide` or `debug.skipKernelTC`
   in `WightmanToAlgebra/`. Upstream dependency and its pin unchanged.
 
@@ -52,7 +59,7 @@ theorem wightmanGNS_spec (T) (hT) :
         ι ((wightmanGNS T hT).π O X u) = polyVal T hT X (ι u)
 theorem wightmanVacuum_isVacuum (T) (hT) :
     (wightmanVacuum T hT).IsVacuum (polynomialCovariance T hT)
-theorem gns_recovers_wightman (T) (hT)
+theorem gnsRepresentation_equivalent_wightmanGNS (T) (hT)
     (R : (polynomialNet T hT).GNSRepresentation (wightmanVacuum T hT)) :
     R.Equivalent (wightmanGNS T hT)
 ```
@@ -61,6 +68,9 @@ The Wightman vacuum `ω(X) = ⟨Ω, XΩ⟩` is a Poincaré-invariant state satis
 condition (FR Def. 24, via vector-state spectral measures supported in the closed forward
 cone) with `Ω` the unique translation-invariant vector (FR Def. 25), and every GNS
 representation of it is unitarily equivalent to the Wightman fields acting on `A(M)Ω ⊆ D`.
+All of this lives on `K = closure(A(M)Ω) ⊆ H`; whether `K = H` is open (B2), so it is not
+established that the Wightman representation on `H` is the vacuum representation in the
+sense of FR Def. 25.
 
 Stretch 3, bounded nets (`BoundedNet.lean`):
 
@@ -73,7 +83,21 @@ theorem bounded_haagKastler (T : WightmanTheory H Labels) (hT : T.Axioms)
 
 `M(O) = S(O)''` with hypotheses: `S(O)` adjoint-closed, monotone, commuting at spacelike
 separation (strong locality), covariant under `Ad U(g)`, and the fields localised in `O`
-affiliated with `S(O)''` in weak form. Covariance is `Ad U(g)` (`boundedCovariance_apply`).
+affiliated with `S(O)''` in weak form (`B φ ⊆ (φ†)* B`, weaker than affiliation of the
+closures when `φ` is not essentially self-adjoint). Covariance is `Ad U(g)`
+(`boundedCovariance_apply`). `bounded_haagKastler` is the generic double-commutant fact: its
+proof uses only `mono`, `commute`, `adjoint_mem`, `covariant`. The link to the fields is
+
+```lean
+theorem boundedAlgebra_weakCommute_field {T} (B : BoundedLocalData T) {O O₂ : Region}
+    (hd : CausallyDisjoint O.carrier O₂.carrier) (l : Labels.carrier) (f : TestFunction)
+    (hf : tsupport (f : Spacetime → ℂ) ⊆ O.carrier)
+    (A : H.Operator) (hA : A ∈ boundedAlgebra B O₂) (u v : T.fields.domain) :
+    inner ℂ (T.fields.field (T.adjointLabel l) (conjugateTest f) v).1 (A u.1) =
+      inner ℂ v.1 (A (T.fields.field l f u).1)
+```
+
+No instance of `BoundedLocalData` is constructed for any nontrivial theory (B3).
 
 ## Axioms
 
@@ -81,11 +105,12 @@ affiliated with `S(O)''` in weak form. Covariance is `Ad U(g)` (`boundedCovarian
 'WightmanToAlgebra.wightman_to_haagKastler' depends on axioms: [propext, Classical.choice, Quot.sound]
 'WightmanToAlgebra.yangMills_haagKastler' depends on axioms: [propext, Classical.choice, Quot.sound]
 'WightmanToAlgebra.wightmanVacuum_isVacuum' depends on axioms: [propext, Classical.choice, Quot.sound]
-'WightmanToAlgebra.gns_recovers_wightman' depends on axioms: [propext, Classical.choice, Quot.sound]
+'WightmanToAlgebra.gnsRepresentation_equivalent_wightmanGNS' depends on axioms: [propext, Classical.choice, Quot.sound]
 'WightmanToAlgebra.wightmanGNS_spec' depends on axioms: [propext, Classical.choice, Quot.sound]
 'WightmanToAlgebra.wightmanVacuum_apply' depends on axioms: [propext, Classical.choice, Quot.sound]
 'WightmanToAlgebra.bounded_haagKastler' depends on axioms: [propext, Classical.choice, Quot.sound]
 'WightmanToAlgebra.boundedCovariance_apply' depends on axioms: [propext, Classical.choice, Quot.sound]
+'WightmanToAlgebra.boundedAlgebra_weakCommute_field' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
 ## Decisions (full text in `DECISIONS.md`)
@@ -105,6 +130,13 @@ affiliated with `S(O)''` in weak form. Covariance is `Ad U(g)` (`boundedCovarian
 - **D5** `BoundedLocalData.affiliated` strengthened after a fidelity REJECT: the first
   version only constrained domain-preserving commutant elements and could hold vacuously.
 - **D6** Fidelity re-review of D5: APPROVE.
+- **D7** (PI review) Retroactive entry for definitions supplied as data:
+  `polynomialCovariance`, `wightmanVacuum`, `wightmanGNS`, `boundedCovariance`.
+- **D8** (PI review) `Net.Timeslice` uses the domain of dependence, not FR A5's Cauchy
+  surface of `O₂`; left unchanged since timeslice is unclaimed; the GFF counterexample
+  refutes both forms.
+- **D9** (PI review) `gns_recovers_wightman` renamed; new theorem
+  `boundedAlgebra_weakCommute_field` uses the `affiliated` hypothesis.
 
 ## Audits (`AUDIT.md`)
 
@@ -124,6 +156,22 @@ affiliated with `S(O)''` in weak form. Covariance is `Ad U(g)` (`boundedCovarian
 - **B2 GNS space vs `H`.** The Wightman GNS space is `closure(A(M)Ω)`; proving it is all of
   `H` needs joint continuity of Wightman functions in the Schwartz topology
   (Banach–Steinhaus on Fréchet spaces), not done.
+
+- **B3 No nontrivial `BoundedLocalData`.** Building one needs unbounded spectral theory.
+
+## Independent PI review (`REVIEW.md`)
+
+Verdict: sound, core claim faithful, fidelity issues in descriptions. Responses:
+
+| Finding | Response |
+| --- | --- |
+| F1 Yang–Mills statement adds nothing beyond `JointExistence` | Opening of this report rewritten to say the result is conditional and general |
+| F2 bounded theorem restates hypotheses; `affiliated` unused | Docs say so; new theorem `boundedAlgebra_weakCommute_field` uses it; B3 records the missing instance; README qualifies "affiliated" as the weak form |
+| F3 GNS naming overstates | Renamed to `gnsRepresentation_equivalent_wightmanGNS`; README and this report state the `closure(A(M)Ω)` caveat |
+| F4 Timeslice differs from FR A5 | D8; AUDIT addendum |
+| F5 wrong grep claim in TIMESLICE.md | Corrected; conclusion unchanged |
+| F6 `polynomialCovariance` had no DECISIONS entry | D7 |
+| F7 stale final commit | Updated below |
 
 ## Process notes
 
