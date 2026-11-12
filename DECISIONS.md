@@ -100,3 +100,10 @@ New (reviewer's proposal, `B φ ⊆ (φ†)* B`, no domain invariance needed):
       inner ℂ v.1 (B (T.fields.field l f u).1)
 ```
 Re-review of the fix requested (see D6).
+
+## D6 (2026-11-11): fidelity re-review of D5: APPROVE
+
+Second independent agent: the new `affiliated` is the weak form of `B φ ⊆ (φ†)* B` with slot
+order matching W1's `AdjointAxiom`; non-vacuous (with `S(O)` empty or scalar, rank-one `B`
+would force every field localised in `O` to act as a scalar); satisfiable in the intended
+example under strong locality; consistent.
