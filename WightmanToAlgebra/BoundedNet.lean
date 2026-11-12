@@ -99,10 +99,10 @@ def restrictStarAlgEquiv (φ : A ≃⋆ₐ[ℂ] A) (M N : StarSubalgebra ℂ A)
   invFun b := ⟨φ.symm b, (h _).1 (by rw [φ.apply_symm_apply]; exact b.2)⟩
   left_inv a := Subtype.ext (φ.symm_apply_apply a)
   right_inv b := Subtype.ext (φ.apply_symm_apply b)
-  map_mul' a b := Subtype.ext (map_mul φ a b)
-  map_add' a b := Subtype.ext (map_add φ a b)
-  map_star' a := Subtype.ext (map_star φ a)
-  map_smul' c a := Subtype.ext (map_smul φ c a)
+  map_mul' a b := Subtype.ext (map_mul φ (a : A) b)
+  map_add' a b := Subtype.ext (map_add φ (a : A) b)
+  map_star' a := Subtype.ext (map_star φ (a : A))
+  map_smul' c a := Subtype.ext (map_smul φ c (a : A))
 
 end BoundedAux
 
@@ -180,11 +180,11 @@ theorem bounded_haagKastler (T : WightmanTheory H Labels) (hT : T.Axioms)
     apply Subtype.ext
     show a * b = b * a
     have hS : B.S O₁ ⊆ (StarSubalgebra.centralizer ℂ (B.S O₂) : Set H.Operator) :=
-      fun A hA ↦ StarSubalgebra.mem_centralizer_iff.2 fun g hg ↦
+      fun A hA ↦ (StarSubalgebra.mem_centralizer_iff ℂ).2 fun g hg ↦
         ⟨(B.commute hd A hA g hg).eq.symm, (B.commute hd A hA _ (B.adjoint_mem hg)).eq.symm⟩
     have hb' : b ∈ StarSubalgebra.centralizer ℂ (B.S O₁) :=
-      StarSubalgebra.centralizer_le _ _ hS hb
-    exact ((StarSubalgebra.mem_centralizer_iff.1 ha) b hb').1.symm
+      StarSubalgebra.centralizer_le ℂ _ _ hS hb
+    exact (((StarSubalgebra.mem_centralizer_iff ℂ).1 ha) b hb').1.symm
   · intro g O₁ O₂ h a
     rfl
   · intro O a
