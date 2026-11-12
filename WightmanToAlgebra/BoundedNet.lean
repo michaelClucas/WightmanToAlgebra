@@ -1,0 +1,80 @@
+import WightmanToAlgebra.Main
+
+/-! Stretch 3: a net of von Neumann algebras from a Wightman theory, under explicit
+hypotheses.
+
+Bounded local data: for each region `O` a set `S(O)` of bounded operators (the intended
+example: spectral projections of the closures of hermitian smeared fields `φ(l, f)`,
+`tsupport f ⊆ O`), closed under adjoints, monotone in `O`, commuting at spacelike
+separation (strong locality: this is the hypothesis that does not follow from W3), and
+covariant under `U(g)`. The local algebra is the double commutant
+`M(O) = S(O)''`, a von Neumann algebra. The field `affiliated` ties `S(O)` to the
+Wightman fields: every bounded operator commuting with `S(O)` and preserving the
+domain commutes on the domain with the fields localised in `O` (i.e. those fields are
+affiliated with `M(O)`); this rules out degenerate choices such as `S(O) = ∅`. -/
+
+set_option autoImplicit false
+noncomputable section
+
+namespace WightmanToAlgebra
+
+open YangMills
+
+variable {H : HilbertSpace} {Labels : FieldLabels}
+
+/-- `U(g)` for Poincaré coordinates `g`. -/
+def unitaryOf (T : WightmanTheory H Labels) (g : PoincareCoordinates) : H.Operator :=
+  T.poincare.onStates (T.poincare.coordinates.symm g)
+
+/-- Hypotheses for the bounded net. -/
+structure BoundedLocalData (T : WightmanTheory H Labels) where
+  S : Region → Set H.Operator
+  adjoint_mem {O : Region} {A : H.Operator} : A ∈ S O → ContinuousLinearMap.adjoint A ∈ S O
+  mono {O₁ O₂ : Region} : O₁.carrier ⊆ O₂.carrier → S O₁ ⊆ S O₂
+  commute {O₁ O₂ : Region} : CausallyDisjoint O₁.carrier O₂.carrier →
+    ∀ A ∈ S O₁, ∀ B ∈ S O₂, Commute A B
+  covariant (g : PoincareCoordinates) (O : Region) :
+    (fun A ↦ unitaryOf T g * A * ContinuousLinearMap.adjoint (unitaryOf T g)) '' S O =
+      S (O.map g)
+  affiliated (O : Region) (l : Labels.carrier) (f : TestFunction)
+      (hf : tsupport (f : Spacetime → ℂ) ⊆ O.carrier) (B : H.Operator)
+      (hB : ∀ A ∈ S O, Commute A B)
+      (hD : Set.MapsTo B (T.fields.domain : Set H.carrier) T.fields.domain)
+      (u : T.fields.domain) :
+    B (T.fields.field l f u).1 = (T.fields.field l f ⟨B u.1, hD u.2⟩).1
+
+/-- `M(O) = S(O)''`. -/
+def boundedAlgebra {T : WightmanTheory H Labels} (B : BoundedLocalData T) (O : Region) :
+    StarSubalgebra ℂ H.Operator :=
+  StarSubalgebra.centralizer ℂ (StarSubalgebra.centralizer ℂ (B.S O) : Set H.Operator)
+
+theorem boundedAlgebra_mono {T : WightmanTheory H Labels} (B : BoundedLocalData T)
+    {O₁ O₂ : Region} (h : O₁.carrier ⊆ O₂.carrier) : boundedAlgebra B O₁ ≤ boundedAlgebra B O₂ :=
+  StarSubalgebra.centralizer_le _ _ _ (StarSubalgebra.centralizer_le _ _ _ (B.mono h))
+
+/-- The von Neumann net `O ↦ S(O)''`, with the subalgebra inclusions. -/
+def boundedNet {T : WightmanTheory H Labels} (B : BoundedLocalData T) : Net where
+  Alg O := boundedAlgebra B O
+  incl h := StarSubalgebra.inclusion (boundedAlgebra_mono B h)
+
+/-- Covariance `A ↦ U(g) A U(g)*`. -/
+def boundedCovariance (T : WightmanTheory H Labels) (hT : T.Axioms) (B : BoundedLocalData T) :
+    (boundedNet B).Covariance :=
+  sorry
+
+theorem boundedCovariance_apply (T : WightmanTheory H Labels) (hT : T.Axioms)
+    (B : BoundedLocalData T) (g : PoincareCoordinates) (O : Region)
+    (a : boundedAlgebra B O) :
+    ((show boundedAlgebra B (O.map g) from (boundedCovariance T hT B).act g O a) : H.Operator) =
+      unitaryOf T g * (a : H.Operator) * ContinuousLinearMap.adjoint (unitaryOf T g) := by
+  sorry
+
+/-- Stretch 3: Haag–Kastler (isotony, Einstein causality, covariance) for the von
+Neumann net under the explicit hypotheses `BoundedLocalData`. -/
+theorem bounded_haagKastler (T : WightmanTheory H Labels) (hT : T.Axioms)
+    (B : BoundedLocalData T) :
+    (boundedNet B).Isotony ∧ (boundedNet B).EinsteinCausality ∧
+      (boundedNet B).Covariant (boundedCovariance T hT B) := by
+  sorry
+
+end WightmanToAlgebra
