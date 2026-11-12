@@ -1,4 +1,5 @@
 import WightmanToAlgebra.Main
+import WightmanToAlgebra.DoubleCone
 
 /-! Stretch 1: states on the net, the spectrum condition, vacuum states and GNS
 representations (Fewster–Rejzner Sec. 3 Thm 10, Sec. 5.1 Def. 24, Def. 25).
@@ -20,7 +21,8 @@ open scoped ComplexOrder
 /-- Any two regions lie in a common region (directedness of the index set). -/
 theorem Region.exists_common (O₁ O₂ : Region) :
     ∃ O : Region, O₁.carrier ⊆ O.carrier ∧ O₂.carrier ⊆ O.carrier := by
-  sorry
+  obtain ⟨r, hr, h⟩ := exists_doubleCone_superset (O₁.bounded.union O₂.bounded)
+  exact ⟨doubleCone r hr, Set.subset_union_left.trans h, Set.subset_union_right.trans h⟩
 
 /-- Pure translation by `x` in Poincaré coordinates. -/
 def translationCoords (x : Spacetime) : PoincareCoordinates :=
@@ -69,10 +71,93 @@ def GNSRepresentation.Equivalent {ω : N.State} (R S : N.GNSRepresentation ω) :
     V R.vector = S.vector ∧
     ∀ (O : Region) (a : N.Alg O) (u : R.domain), V (R.π O a u) = S.π O a (V u)
 
+/-- `⟨π(a)Ω, π(b)Ω⟩ = ω(a* b)` computed in a region containing both. -/
+theorem GNSRepresentation.inner_pi_vector {ω : N.State} (R : N.GNSRepresentation ω)
+    {O O' O'' : Region} (h : O.carrier ⊆ O''.carrier) (h' : O'.carrier ⊆ O''.carrier)
+    (a : N.Alg O) (b : N.Alg O') :
+    inner ℂ (R.π O a R.vector).1 (R.π O' b R.vector).1 =
+      ω.ω O'' (Star.star (N.incl h a) * N.incl h' b) := by
+  rw [← R.compatible h a, ← R.compatible h' b, R.star, ← Module.End.mul_apply, ← map_mul,
+    R.expectation]
+
+/-- Inner products of vectors `π(a)Ω` agree in any two GNS representations. -/
+theorem GNSRepresentation.inner_pi_vector_eq {ω : N.State} (R S : N.GNSRepresentation ω)
+    {O O' : Region} (a : N.Alg O) (b : N.Alg O') :
+    inner ℂ (R.π O a R.vector).1 (R.π O' b R.vector).1 =
+      inner ℂ (S.π O a S.vector).1 (S.π O' b S.vector).1 := by
+  obtain ⟨O'', h, h'⟩ := Region.exists_common O O'
+  rw [R.inner_pi_vector h h', S.inner_pi_vector h h']
+
+/-- `π(a) π(b) = π(a b)` in a region containing both. -/
+theorem GNSRepresentation.pi_pi {ω : N.State} (R : N.GNSRepresentation ω)
+    {O O' O'' : Region} (h : O.carrier ⊆ O''.carrier) (h' : O'.carrier ⊆ O''.carrier)
+    (a : N.Alg O) (b : N.Alg O') (u : R.domain) :
+    R.π O a (R.π O' b u) = R.π O'' (N.incl h a * N.incl h' b) u := by
+  rw [map_mul, Module.End.mul_apply, R.compatible, R.compatible]
+
+/-- A domain vector orthogonal to all `π(b)Ω` vanishes (cyclicity). -/
+theorem GNSRepresentation.eq_zero_of_inner {ω : N.State} (S : N.GNSRepresentation ω)
+    (d : S.domain) (h : ∀ (O : Region) (b : N.Alg O), inner ℂ d.1 (S.π O b S.vector).1 = 0) :
+    d = 0 := by
+  obtain ⟨O, b, hd⟩ := S.cyclic d
+  have := h O b
+  rw [← hd] at this
+  exact Subtype.ext (inner_self_eq_zero.mp this)
+
 /-- GNS uniqueness (FR Thm 10). -/
 theorem GNSRepresentation.equivalent {ω : N.State} (R S : N.GNSRepresentation ω) :
     R.Equivalent S := by
-  sorry
+  choose O a ha using R.cyclic
+  obtain ⟨f, hf⟩ : ∃ f : R.domain → S.domain, ∀ u, f u = S.π (O u) (a u) S.vector :=
+    ⟨_, fun _ ↦ rfl⟩
+  have key : ∀ u (O' : Region) (b : N.Alg O'),
+      inner ℂ (f u).1 (S.π O' b S.vector).1 = inner ℂ u.1 (R.π O' b R.vector).1 := by
+    intro u O' b
+    rw [hf, ← R.inner_pi_vector_eq S, ← ha u]
+  have map_pi : ∀ (O' : Region) (b : N.Alg O'), f (R.π O' b R.vector) = S.π O' b S.vector := by
+    intro O' b
+    refine sub_eq_zero.mp (S.eq_zero_of_inner _ fun O'' c ↦ ?_)
+    rw [Submodule.coe_sub, inner_sub_left, key, R.inner_pi_vector_eq S, sub_self]
+  have map_add : ∀ u v, f (u + v) = f u + f v := by
+    intro u v
+    refine sub_eq_zero.mp (S.eq_zero_of_inner _ fun O'' c ↦ ?_)
+    rw [Submodule.coe_sub, Submodule.coe_add, inner_sub_left, inner_add_left, key, key, key,
+      Submodule.coe_add, inner_add_left, sub_self]
+  have map_smul : ∀ (z : ℂ) u, f (z • u) = z • f u := by
+    intro z u
+    refine sub_eq_zero.mp (S.eq_zero_of_inner _ fun O'' c ↦ ?_)
+    rw [Submodule.coe_sub, Submodule.coe_smul, inner_sub_left, inner_smul_left, key, key,
+      Submodule.coe_smul, inner_smul_left, sub_self]
+  have iso : ∀ u v, inner ℂ (f u).1 (f v).1 = inner ℂ u.1 v.1 := by
+    intro u v
+    conv_lhs => rw [hf v]
+    rw [key, ← ha v]
+  let F : R.domain →ₗ[ℂ] S.domain :=
+    { toFun := f
+      map_add' := map_add
+      map_smul' := map_smul }
+  have hF : ∀ u, F u = f u := fun _ ↦ rfl
+  have inj : Function.Injective F := by
+    refine (injective_iff_map_eq_zero F).mpr fun u hu ↦ ?_
+    have := iso u u
+    rw [← hF, hu, ZeroMemClass.coe_zero, inner_zero_left] at this
+    exact Subtype.ext (inner_self_eq_zero.mp this.symm)
+  have surj : Function.Surjective F := by
+    intro w
+    obtain ⟨O', b, rfl⟩ := S.cyclic w
+    exact ⟨R.π O' b R.vector, map_pi O' b⟩
+  refine ⟨LinearEquiv.ofBijective F ⟨inj, surj⟩, fun u v ↦ ?_, ?_, fun O' c u ↦ ?_⟩
+  · simp only [LinearEquiv.ofBijective_apply, hF]
+    exact iso u v
+  · obtain ⟨O0, -, -⟩ := R.cyclic R.vector
+    simp only [LinearEquiv.ofBijective_apply, hF]
+    calc f R.vector = f (R.π O0 1 R.vector) := by rw [map_one, Module.End.one_apply]
+      _ = S.π O0 1 S.vector := map_pi O0 1
+      _ = S.vector := by rw [map_one, Module.End.one_apply]
+  · obtain ⟨O1, b, rfl⟩ := R.cyclic u
+    obtain ⟨O'', h, h'⟩ := Region.exists_common O' O1
+    simp only [LinearEquiv.ofBijective_apply, hF]
+    rw [map_pi, R.pi_pi h h', S.pi_pi h h', map_pi]
 
 /-- A strongly continuous unitary representation of translations on the GNS space
 that fixes the GNS vector and implements `α` on translations (FR Thm 23, Def. 24). -/
